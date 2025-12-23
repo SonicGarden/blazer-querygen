@@ -6,7 +6,6 @@ AI-powered SQL query generation for [Blazer](https://github.com/ankane/blazer). 
 
 - 🤖 Generate SQL queries from natural language descriptions
 - 🔒 Secure: Only sends database schema (no actual data) to OpenAI
-- ⚡ Fast: Async processing in production, sync in development
 - 🛡️ Safe: Automatically blocks dangerous SQL operations (INSERT, UPDATE, DELETE, etc.)
 - 🎯 Smart: Leverages table and column comments for better context
 - ⚙️ Configurable: Support for multiple OpenAI models
@@ -53,21 +52,7 @@ Or add it to your `.env` file:
 OPENAI_API_KEY=your_api_key_here
 ```
 
-3. Include the JavaScript file in your application.
-
-If you're using Sprockets, add to `app/assets/config/manifest.js`:
-
-```javascript
-//= link blazer/querygen/prompts.js
-```
-
-Or add to your layout:
-
-```erb
-<%= javascript_include_tag "blazer/querygen/prompts" %>
-```
-
-4. Restart your Rails server.
+3. Restart your Rails server.
 
 ## Usage
 
@@ -91,9 +76,9 @@ Edit `config/initializers/blazer_querygen.rb` to customize:
 
 ```ruby
 Blazer::Querygen.configure do |config|
-  # OpenAI Model (default: "gpt-4o")
-  # Options: "gpt-4o", "gpt-4o-mini", "gpt-4-turbo"
-  config.ai_model = "gpt-4o"
+  # OpenAI Model (default: "gpt-5.2")
+  # Options: "gpt-5.2", "gpt-4o", "gpt-4o-mini", "o1", "o1-mini"
+  config.ai_model = "gpt-5.2"
 
   # API Key (use environment variable for security)
   config.api_key = ENV["OPENAI_API_KEY"]
@@ -145,15 +130,6 @@ The gem adds the following endpoints to your application:
 
 - `POST /blazer/prompts/run` - Generate a SQL query from a prompt
 - `GET /blazer/querygen/health` - Check configuration status
-
-## Cost Considerations
-
-This gem uses OpenAI's API, which incurs costs based on usage:
-
-- Schema is cached for 1 hour to minimize API calls
-- Approximate cost per query: $0.001 - $0.01 (depending on schema size and model)
-- Consider setting rate limits in production
-- Use `gpt-4o-mini` for lower costs (configure in initializer)
 
 ## Future Enhancements
 

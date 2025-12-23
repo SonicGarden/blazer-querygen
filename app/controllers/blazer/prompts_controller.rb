@@ -12,23 +12,8 @@ module Blazer
         return
       end
 
-      if async_generation?
-        # Async generation via background job
-        job = RunPromptJob.perform_later(
-          prompt: prompt,
-          data_source: data_source
-        )
-
-        render json: {
-          job_id: job.job_id,
-          status: "processing",
-          success: true
-        }
-      else
-        # Synchronous generation for development
-        result = generate_query_sync(prompt, data_source)
-        render json: result
-      end
+      result = generate_query(prompt, data_source)
+      render json: result
     rescue Blazer::Querygen::AIClient::ConfigurationError => e
       render json: { error: "Configuration error: #{e.message}", success: false }, status: :service_unavailable
     rescue StandardError => e
@@ -55,11 +40,7 @@ module Blazer
 
     private
 
-    def async_generation?
-      Rails.env.production? || params[:async] == "true"
-    end
-
-    def generate_query_sync(prompt, data_source)
+    def generate_query(prompt, data_source)
       schema_extractor = Blazer::Querygen::SchemaExtractor.new
       schema = schema_extractor.extract(data_source)
 
