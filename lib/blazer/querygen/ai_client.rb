@@ -66,6 +66,10 @@ module Blazer
       end
 
       def system_prompt
+        # Use custom prompt if configured
+        return Blazer::Querygen.config.system_prompt if Blazer::Querygen.config.system_prompt.present?
+
+        # Default prompt
         <<~PROMPT
           You are an expert SQL query generator. Your task is to generate valid SQL queries based on user requests.
 
@@ -81,6 +85,12 @@ module Blazer
       end
 
       def build_user_prompt(prompt, schema)
+        # Use custom template if configured
+        if Blazer::Querygen.config.user_prompt_template.present?
+          return Blazer::Querygen.config.user_prompt_template.call(prompt, format_schema(schema))
+        end
+
+        # Default template
         <<~PROMPT
           Generate a SQL query for the following request:
           #{prompt}

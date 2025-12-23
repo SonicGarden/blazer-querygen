@@ -109,6 +109,43 @@ Blazer::Querygen.configure do |config|
 end
 ```
 
+### Custom Prompts
+
+You can customize both the system prompt and user prompt template to suit your specific needs.
+
+**Note**: When using custom prompts, you are responsible for ensuring proper security instructions. The gem provides SQL sanitization (`sanitize_queries = true` by default) as a safety net, but proper AI instructions are recommended.
+
+#### Custom System Prompt
+
+```ruby
+# Override the default system prompt
+config.system_prompt = <<~PROMPT
+  You are an SQL query generator.
+
+  IMPORTANT: Generate only SELECT statements.
+  Do not generate INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, or TRUNCATE.
+
+  [Your additional custom instructions here]
+PROMPT
+```
+
+#### Custom User Prompt Template
+
+```ruby
+# Override how user requests and schema are formatted
+# Receives two parameters: user_input (String), formatted_schema (String)
+config.user_prompt_template = lambda do |user_input, formatted_schema|
+  <<~PROMPT
+    Generate SQL for: #{user_input}
+
+    Tables:
+    #{formatted_schema}
+
+    Output only the SQL query.
+  PROMPT
+end
+```
+
 ## Security
 
 - **Schema Only**: Only database schema information (table names, column names, types, and comments) is sent to OpenAI. No actual data is transmitted.

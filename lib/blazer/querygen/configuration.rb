@@ -18,6 +18,10 @@ module Blazer
       # Schema extraction settings
       attr_accessor :include_table_comments
 
+      # Prompt customization settings
+      attr_accessor :system_prompt
+      attr_accessor :user_prompt_template
+
       def initialize
         @ai_model = "gpt-5.2"
         @api_key = ENV.fetch("OPENAI_API_KEY", nil)
@@ -32,6 +36,10 @@ module Blazer
         @include_table_comments = true
         @include_column_comments = true
         @excluded_tables = %w[schema_migrations ar_internal_metadata]
+
+        # Prompt customization (nil = use defaults)
+        @system_prompt = nil
+        @user_prompt_template = nil
       end
     end
   end

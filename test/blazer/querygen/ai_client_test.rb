@@ -111,6 +111,91 @@ module Blazer
           Blazer::Querygen.config.api_key = original_key
         end
       end
+
+      test "uses default system prompt when not configured" do
+        original_prompt = Blazer::Querygen.config.system_prompt
+        original_key = Blazer::Querygen.config.api_key
+
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          Blazer::Querygen.config.system_prompt = nil
+
+          client = AIClient.new
+          prompt = client.send(:system_prompt)
+
+          assert_includes prompt, "expert SQL query generator"
+          assert_includes prompt, "ONLY SELECT statements"
+        ensure
+          Blazer::Querygen.config.system_prompt = original_prompt
+          Blazer::Querygen.config.api_key = original_key
+        end
+      end
+
+      test "uses custom system prompt when configured" do
+        original_prompt = Blazer::Querygen.config.system_prompt
+        original_key = Blazer::Querygen.config.api_key
+        custom_prompt = "Custom SQL generator instructions"
+
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          Blazer::Querygen.config.system_prompt = custom_prompt
+
+          client = AIClient.new
+          prompt = client.send(:system_prompt)
+
+          assert_equal custom_prompt, prompt
+        ensure
+          Blazer::Querygen.config.system_prompt = original_prompt
+          Blazer::Querygen.config.api_key = original_key
+        end
+      end
+
+      test "uses default user prompt template when not configured" do
+        original_template = Blazer::Querygen.config.user_prompt_template
+        original_key = Blazer::Querygen.config.api_key
+
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          Blazer::Querygen.config.user_prompt_template = nil
+
+          client = AIClient.new
+          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }] }]
+
+          prompt = client.send(:build_user_prompt, "Show all users", schema)
+
+          assert_includes prompt, "Generate a SQL query for the following request:"
+          assert_includes prompt, "Show all users"
+          assert_includes prompt, "Database Schema:"
+        ensure
+          Blazer::Querygen.config.user_prompt_template = original_template
+          Blazer::Querygen.config.api_key = original_key
+        end
+      end
+
+      test "uses custom user prompt template when configured" do
+        original_template = Blazer::Querygen.config.user_prompt_template
+        original_key = Blazer::Querygen.config.api_key
+        custom_template = lambda do |user_input, formatted_schema|
+          "Custom: #{user_input} | Schema: #{formatted_schema}"
+        end
+
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          Blazer::Querygen.config.user_prompt_template = custom_template
+
+          client = AIClient.new
+          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }] }]
+
+          prompt = client.send(:build_user_prompt, "Show all users", schema)
+
+          assert_includes prompt, "Custom: Show all users"
+          assert_includes prompt, "Schema:"
+          assert_includes prompt, "Table: users"
+        ensure
+          Blazer::Querygen.config.user_prompt_template = original_template
+          Blazer::Querygen.config.api_key = original_key
+        end
+      end
     end
   end
 end
