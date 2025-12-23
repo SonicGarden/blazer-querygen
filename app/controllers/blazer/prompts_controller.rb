@@ -3,7 +3,6 @@
 module Blazer
   # Controller for AI-powered query generation
   class PromptsController < BaseController
-
     def run
       prompt = params[:prompt]
       data_source = params[:data_source]

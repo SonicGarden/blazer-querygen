@@ -24,15 +24,13 @@ module Blazer
 
       private
 
-      def get_connection(data_source_name)
+      def get_connection(_data_source_name)
         # For now, always use ActiveRecord's default connection
         # This works for most cases where Blazer is using the same database as the Rails app
         # Future enhancement: Support multiple Blazer data sources properly
-        if defined?(ActiveRecord::Base)
-          ActiveRecord::Base.connection
-        else
-          raise Blazer::Querygen::Error, "No database connection available"
-        end
+        raise Blazer::Querygen::Error, "No database connection available" unless defined?(ActiveRecord::Base)
+
+        ActiveRecord::Base.connection
 
         # TODO: Support Blazer data sources properly
         # The challenge is that Blazer::DataSource doesn't expose the connection directly
@@ -80,7 +78,9 @@ module Blazer
           fetch_mysql_column_comment(connection, table_name, column_name)
         end
       rescue StandardError => e
-        Rails.logger.debug("Failed to fetch column comment for #{table_name}.#{column_name}: #{e.message}") if defined?(Rails)
+        if defined?(Rails)
+          Rails.logger.debug("Failed to fetch column comment for #{table_name}.#{column_name}: #{e.message}")
+        end
         nil
       end
 
