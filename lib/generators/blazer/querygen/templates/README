@@ -1,0 +1,53 @@
+===============================================================================
+
+Blazer::Querygen has been installed!
+
+Next steps:
+
+1. Set your OpenAI API key as an environment variable:
+   export OPENAI_API_KEY=your_api_key_here
+
+   Or add to .env file:
+   OPENAI_API_KEY=your_api_key_here
+
+2. Configure the initializer if needed:
+   config/initializers/blazer_querygen.rb
+
+3. Include the JavaScript in Blazer's layout:
+
+   Create app/views/layouts/blazer/application.html.erb:
+
+   <!DOCTYPE html>
+   <html>
+   <head>
+     <title>Blazer</title>
+     <%= csrf_meta_tags %>
+     <%= csp_meta_tag %>
+     <%= stylesheet_link_tag "blazer/application" %>
+     <%= javascript_include_tag "blazer/application" %>
+     <%= javascript_include_tag "blazer/querygen/prompts" %>
+   </head>
+   <body>
+     <%= yield %>
+   </body>
+   </html>
+
+   Note: This overrides Blazer's default layout to include our JavaScript.
+
+4. Add to asset precompile (config/initializers/assets.rb):
+   Rails.application.config.assets.precompile += %w[blazer/querygen/prompts.js]
+
+5. Restart your Rails server:
+   rails restart
+
+6. Navigate to Blazer's "New Query" page and you'll see the AI generation UI!
+
+Troubleshooting:
+- If JavaScript doesn't load, check browser console for errors
+- Verify OPENAI_API_KEY is set: rails c > ENV['OPENAI_API_KEY']
+- Check health endpoint: /blazer/querygen/health
+
+For more information, visit:
+https://github.com/mat_aki/blazer-querygen
+
+===============================================================================

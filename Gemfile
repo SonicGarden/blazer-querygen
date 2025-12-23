@@ -9,5 +9,6 @@ gem "irb"
 gem "rake", "~> 13.0"
 
 gem "minitest", "~> 5.16"
+gem "sqlite3", "~> 2.0" # For tests
 
 gem "rubocop", "~> 1.21"

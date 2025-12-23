@@ -7,7 +7,8 @@ class Blazer::TestQuerygen < Minitest::Test
     refute_nil ::Blazer::Querygen::VERSION
   end
 
-  def test_it_does_something_useful
-    assert false
+  def test_configuration_is_accessible
+    assert_respond_to ::Blazer::Querygen, :configure
+    assert_respond_to ::Blazer::Querygen, :config
   end
 end
