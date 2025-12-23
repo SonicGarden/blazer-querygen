@@ -62,6 +62,11 @@ The `reasoning_model?` method detects model type by checking if model name start
 
 **Retry Logic**: Implements automatic retry with exponential backoff for rate limits and transient errors.
 
+**Prompt Customization**: Supports custom system prompts and user prompt templates via configuration:
+- `system_prompt` method: Returns custom prompt if configured, otherwise uses default SELECT-only instructions
+- `build_user_prompt` method: Uses custom Lambda/Proc if configured, otherwise uses default template
+- Custom `user_prompt_template` receives two parameters: `user_input` (String) and `formatted_schema` (String)
+
 #### 2. SchemaExtractor (`lib/blazer/querygen/schema_extractor.rb`)
 Extracts database schema without accessing actual data:
 
@@ -83,7 +88,7 @@ Constructs prompts for AI with schema context:
 Handles HTTP requests for query generation:
 
 - Inherits from `Blazer::BaseController` (not `ApplicationController`) to use Blazer's authentication
-- Supports both sync (development) and async (production) generation via `async_generation?`
+- Synchronous generation: Extracts schema, calls AIClient, sanitizes SQL, and returns JSON response
 - `sanitize_sql`: Regex-based blocker for dangerous SQL operations
 
 **Security**: Uses regex `/\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|GRANT|REVOKE)\b/i` to block unsafe operations.
@@ -114,16 +119,34 @@ All configuration lives in `lib/blazer/querygen/configuration.rb` with sensible 
 
 ```ruby
 Blazer::Querygen.configure do |config|
-  config.ai_model = "gpt-4o"  # or "gpt-4o-mini", "o1-preview", "gpt-5.2", etc.
+  # AI Model Configuration
+  config.ai_model = "gpt-5.2"  # or "gpt-4o", "gpt-4o-mini", "o1", "o1-mini", etc.
   config.api_key = ENV["OPENAI_API_KEY"]
+
+  # Performance Settings
   config.timeout = 10
   config.max_retries = 3
   config.max_tables_in_context = 50
+
+  # Security Settings
   config.sanitize_queries = true
   config.allowed_operations = [:select]
   config.excluded_tables = ["schema_migrations", "ar_internal_metadata"]
+
+  # Prompt Customization (Optional)
+  # Override system prompt for custom AI instructions
+  config.system_prompt = nil  # nil = use default SELECT-only prompt
+
+  # Override user prompt template (receives user_input and formatted_schema)
+  config.user_prompt_template = nil  # nil = use default template
+  # Example:
+  # config.user_prompt_template = lambda do |user_input, formatted_schema|
+  #   "Generate SQL for: #{user_input}\n\nSchema:\n#{formatted_schema}"
+  # end
 end
 ```
+
+**Prompt Customization Security Note**: When using custom prompts (`system_prompt` or `user_prompt_template`), developers are responsible for ensuring proper security instructions. The gem provides SQL sanitization as a safety net, but proper AI instructions are recommended.
 
 ## Testing Strategy
 
@@ -140,7 +163,7 @@ Test setup uses in-memory SQLite with sample schema (users, products tables).
 
 1. Check if model uses reasoning parameters (like o1 or gpt-5.x)
 2. Update `reasoning_model?` method in `AIClient` to detect the new model
-3. Test with both sync and async generation modes
+3. Test with synchronous generation mode
 
 ### Modifying Schema Context
 
@@ -148,6 +171,39 @@ Schema extraction happens in `SchemaExtractor`:
 - Add new metadata extraction in `get_columns` or `get_tables`
 - Update `format_schema` in `PromptBuilder` to include new metadata in prompt
 - Be mindful of token limits when adding more context
+
+### Customizing AI Prompts
+
+To customize how the AI generates queries:
+
+1. **System Prompt Customization** (full replacement):
+   ```ruby
+   config.system_prompt = <<~PROMPT
+     You are an SQL expert.
+     Generate only SELECT statements.
+     [Your custom instructions here]
+   PROMPT
+   ```
+
+2. **User Prompt Template Customization** (Lambda/Proc with two parameters):
+   ```ruby
+   config.user_prompt_template = lambda do |user_input, formatted_schema|
+     <<~PROMPT
+       Task: #{user_input}
+
+       Available tables:
+       #{formatted_schema}
+
+       Output SQL only.
+     PROMPT
+   end
+   ```
+
+3. **Testing Custom Prompts**:
+   - Test that nil values fall back to defaults
+   - Verify both parameters are passed correctly to Lambda
+   - Check that custom prompts still generate valid SQL
+   - Add tests in `test/blazer/querygen/ai_client_test.rb`
 
 ### Debugging JavaScript Integration
 
@@ -169,3 +225,4 @@ Use browser console to debug: selectors are logged during initialization (can ad
 2. **SQL sanitization is regex-based**: Not foolproof, consider SQL parser for production
 3. **API keys in environment**: Never commit API keys, always use ENV vars
 4. **CSRF protection**: Inherited from Blazer::BaseController
+5. **Custom Prompts**: When using `system_prompt` or `user_prompt_template`, developers are responsible for including proper security instructions (e.g., SELECT-only restrictions). The gem's SQL sanitization provides a safety net but should not be relied upon as the only defense.
