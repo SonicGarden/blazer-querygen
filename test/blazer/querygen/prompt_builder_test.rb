@@ -5,81 +5,198 @@ require "test_helper"
 module Blazer
   module Querygen
     class PromptBuilderTest < ActiveSupport::TestCase
-      test "system_prompt contains SQL generation guidelines" do
-        prompt = PromptBuilder.system_prompt
+      test "system_prompt returns default prompt when not configured" do
+        original_prompt = Blazer::Querygen.config.system_prompt
 
-        assert_includes prompt, "SQL query generator"
-        assert_includes prompt, "SELECT"
-        assert_includes prompt, "no INSERT" # Ensures it warns against INSERT
+        begin
+          Blazer::Querygen.config.system_prompt = nil
+
+          prompt = PromptBuilder.system_prompt
+
+          assert_includes prompt, "expert SQL query generator"
+          assert_includes prompt, "ONLY SELECT statements"
+          assert_includes prompt, "IMPORTANT RULES:"
+        ensure
+          Blazer::Querygen.config.system_prompt = original_prompt
+        end
       end
 
-      test "build_user_prompt includes schema and query" do
-        schema = [
-          {
-            name: "users",
-            comment: "User accounts",
-            columns: [
-              { name: "id", type: "integer", comment: nil },
-              { name: "email", type: "string", comment: "User email address" }
-            ]
-          }
-        ]
+      test "system_prompt returns custom prompt when configured" do
+        original_prompt = Blazer::Querygen.config.system_prompt
+        custom_prompt = "Custom SQL generator instructions"
 
-        query = "Show me all users"
-        prompt = PromptBuilder.build_user_prompt(query, schema)
+        begin
+          Blazer::Querygen.config.system_prompt = custom_prompt
 
-        assert_includes prompt, "users"
-        assert_includes prompt, "id"
-        assert_includes prompt, "email"
-        assert_includes prompt, "Show me all users"
-        assert_includes prompt, "User accounts"
-        assert_includes prompt, "User email address"
+          prompt = PromptBuilder.system_prompt
+
+          assert_equal custom_prompt, prompt
+        ensure
+          Blazer::Querygen.config.system_prompt = original_prompt
+        end
+      end
+
+      test "build_user_prompt returns default format when not configured" do
+        original_template = Blazer::Querygen.config.user_prompt_template
+
+        begin
+          Blazer::Querygen.config.user_prompt_template = nil
+
+          schema = [
+            {
+              name: "users",
+              columns: [
+                { name: "id", type: "integer", null: false, comment: nil },
+                { name: "email", type: "string", null: false, comment: "User email" }
+              ],
+              comment: "User accounts"
+            }
+          ]
+
+          prompt = PromptBuilder.build_user_prompt("Show all users", schema)
+
+          assert_includes prompt, "Generate a SQL query for the following request:"
+          assert_includes prompt, "Show all users"
+          assert_includes prompt, "Database Schema:"
+          assert_includes prompt, "Table: users"
+          assert_includes prompt, "id (integer)"
+          assert_includes prompt, "email (string) -- User email"
+        ensure
+          Blazer::Querygen.config.user_prompt_template = original_template
+        end
+      end
+
+      test "build_user_prompt uses custom template when configured" do
+        original_template = Blazer::Querygen.config.user_prompt_template
+        custom_template = lambda do |user_input, formatted_schema|
+          "Custom: #{user_input} | Schema: #{formatted_schema}"
+        end
+
+        begin
+          Blazer::Querygen.config.user_prompt_template = custom_template
+
+          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }], comment: nil }]
+
+          prompt = PromptBuilder.build_user_prompt("Show all users", schema)
+
+          assert_includes prompt, "Custom: Show all users"
+          assert_includes prompt, "Schema:"
+          assert_includes prompt, "Table: users"
+        ensure
+          Blazer::Querygen.config.user_prompt_template = original_template
+        end
       end
 
       test "format_schema handles empty schema" do
-        schema = []
-        formatted = PromptBuilder.format_schema(schema)
-
-        assert_equal "No schema information available.", formatted
+        result = PromptBuilder.format_schema([])
+        assert_equal "No schema information available.", result
       end
 
-      test "format_schema formats tables with columns" do
+      test "format_schema formats single table without comments" do
         schema = [
           {
-            name: "products",
-            comment: "Product catalog",
+            name: "users",
             columns: [
-              { name: "id", type: "integer", comment: nil },
-              { name: "name", type: "string", comment: "Product name" }
-            ]
+              { name: "id", type: "integer", null: false, comment: nil },
+              { name: "email", type: "string", null: false, comment: nil }
+            ],
+            comment: nil
           }
         ]
 
-        formatted = PromptBuilder.format_schema(schema)
+        result = PromptBuilder.format_schema(schema)
 
-        assert_includes formatted, "Table: products"
-        assert_includes formatted, "(Product catalog)"
-        assert_includes formatted, "id: integer"
-        assert_includes formatted, "name: string"
-        assert_includes formatted, "(Product name)"
+        assert_includes result, "Table: users"
+        assert_includes result, "id (integer)"
+        assert_includes result, "email (string)"
+        refute_includes result, "Comment:"
+        refute_includes result, "--"
       end
 
-      test "format_schema handles nil comments" do
+      test "format_schema formats table with table comment" do
+        schema = [
+          {
+            name: "users",
+            columns: [{ name: "id", type: "integer", null: false, comment: nil }],
+            comment: "User accounts"
+          }
+        ]
+
+        result = PromptBuilder.format_schema(schema)
+
+        assert_includes result, "Table: users"
+        assert_includes result, "Comment: User accounts"
+        assert_includes result, "id (integer)"
+      end
+
+      test "format_schema formats columns with comments" do
+        schema = [
+          {
+            name: "users",
+            columns: [
+              { name: "id", type: "integer", null: false, comment: "Primary key" },
+              { name: "email", type: "string", null: false, comment: "User email address" }
+            ],
+            comment: nil
+          }
+        ]
+
+        result = PromptBuilder.format_schema(schema)
+
+        assert_includes result, "id (integer) -- Primary key"
+        assert_includes result, "email (string) -- User email address"
+      end
+
+      test "format_schema formats multiple tables" do
+        schema = [
+          {
+            name: "users",
+            columns: [{ name: "id", type: "integer", null: false, comment: nil }],
+            comment: "User accounts"
+          },
+          {
+            name: "products",
+            columns: [{ name: "id", type: "integer", null: false, comment: nil }],
+            comment: "Product catalog"
+          }
+        ]
+
+        result = PromptBuilder.format_schema(schema)
+
+        assert_includes result, "Table: users"
+        assert_includes result, "Comment: User accounts"
+        assert_includes result, "Table: products"
+        assert_includes result, "Comment: Product catalog"
+
+        # Verify tables are separated by blank line
+        assert_includes result, "\n\n"
+      end
+
+      test "format_schema matches AIClient original format exactly" do
+        # This test ensures backward compatibility
         schema = [
           {
             name: "orders",
-            comment: nil,
             columns: [
-              { name: "id", type: "integer", comment: nil }
-            ]
+              { name: "id", type: "bigint", null: false, comment: "Order ID" },
+              { name: "user_id", type: "integer", null: false, comment: nil },
+              { name: "total", type: "decimal", null: false, comment: "Order total" }
+            ],
+            comment: "Customer orders"
           }
         ]
 
-        formatted = PromptBuilder.format_schema(schema)
+        result = PromptBuilder.format_schema(schema)
 
-        assert_includes formatted, "Table: orders"
-        assert_includes formatted, "id: integer"
-        assert_not_includes formatted, "(nil)"
+        expected = <<~TEXT.chomp
+          Table: orders
+            Comment: Customer orders
+            id (bigint) -- Order ID
+            user_id (integer)
+            total (decimal) -- Order total
+        TEXT
+
+        assert_equal expected, result
       end
     end
   end

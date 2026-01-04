@@ -12,10 +12,17 @@ module Blazer
         return
       end
 
-      result = generate_query(prompt, data_source)
+      query_generator = Blazer::Querygen::QueryGenerator.new
+      result = query_generator.generate(prompt: prompt, data_source: data_source)
       render json: result
+    rescue Blazer::Querygen::QueryGenerator::UnsafeQueryError => e
+      render json: { error: e.message, success: false }, status: :unprocessable_entity
     rescue Blazer::Querygen::AIClient::ConfigurationError => e
       render json: { error: "Configuration error: #{e.message}", success: false }, status: :service_unavailable
+    rescue Blazer::Querygen::AIClient::APIError => e
+      render json: { error: e.message, success: false }, status: :internal_server_error
+    rescue Blazer::Querygen::AIClient::TimeoutError => e
+      render json: { error: "Request timed out: #{e.message}", success: false }, status: :request_timeout
     rescue StandardError => e
       Rails.logger.error("Query generation failed: #{e.message}")
       Rails.logger.error(e.backtrace.join("\n"))
@@ -36,41 +43,6 @@ module Blazer
           success: false
         }, status: :service_unavailable
       end
-    end
-
-    private
-
-    def generate_query(prompt, data_source)
-      schema_extractor = Blazer::Querygen::SchemaExtractor.new
-      schema = schema_extractor.extract(data_source)
-
-      client = Blazer::Querygen::AIClient.new
-      response = client.generate_query(prompt: prompt, schema: schema)
-
-      sanitized_sql = sanitize_sql(response[:sql])
-
-      {
-        sql: sanitized_sql,
-        prompt: prompt,
-        model: response[:model],
-        success: true
-      }
-    rescue Blazer::Querygen::AIClient::APIError => e
-      { error: e.message, success: false }
-    rescue Blazer::Querygen::AIClient::TimeoutError => e
-      { error: "Request timed out: #{e.message}", success: false }
-    end
-
-    def sanitize_sql(sql)
-      return sql unless Blazer::Querygen.config.sanitize_queries
-
-      # Check for dangerous operations
-      dangerous_patterns = /\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|GRANT|REVOKE)\b/i
-      if sql.match?(dangerous_patterns)
-        raise Blazer::Querygen::Error, "Unsafe SQL operation detected. Only SELECT queries are allowed."
-      end
-
-      sql
     end
   end
 end

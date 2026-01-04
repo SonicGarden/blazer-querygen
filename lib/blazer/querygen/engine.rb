@@ -21,6 +21,13 @@ module Blazer
           get "blazer/querygen/health", to: "blazer/prompts#health"
         end
       end
+
+      # Include view helpers in all ActionView contexts
+      initializer "blazer_querygen.view_helpers" do
+        ActiveSupport.on_load(:action_view) do
+          include Blazer::Querygen::ViewHelpers
+        end
+      end
     end
   end
 end

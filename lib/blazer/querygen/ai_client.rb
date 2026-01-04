@@ -21,11 +21,15 @@ module Blazer
 
       def generate_query(prompt:, schema:)
         with_retry do
+          # Build prompts using PromptBuilder
+          system_prompt_content = PromptBuilder.system_prompt
+          user_prompt_content = PromptBuilder.build_user_prompt(prompt, schema)
+
           parameters = {
             model: @model,
             messages: [
-              { role: "system", content: system_prompt },
-              { role: "user", content: build_user_prompt(prompt, schema) }
+              { role: "system", content: system_prompt_content },
+              { role: "user", content: user_prompt_content }
             ],
             temperature: 0.2
           }
@@ -37,7 +41,7 @@ module Blazer
             parameters[:max_completion_tokens] = 1000
             # o1 models don't support system messages, combine into user message
             parameters[:messages] = [
-              { role: "user", content: "#{system_prompt}\n\n#{build_user_prompt(prompt, schema)}" }
+              { role: "user", content: "#{system_prompt_content}\n\n#{user_prompt_content}" }
             ]
           else
             # Standard models use max_tokens
@@ -63,55 +67,6 @@ module Blazer
         # and don't support temperature or system messages
         model_str = @model.to_s
         model_str.start_with?("o1") || model_str.start_with?("gpt-5")
-      end
-
-      def system_prompt
-        # Use custom prompt if configured
-        return Blazer::Querygen.config.system_prompt if Blazer::Querygen.config.system_prompt.present?
-
-        # Default prompt
-        <<~PROMPT
-          You are an expert SQL query generator. Your task is to generate valid SQL queries based on user requests.
-
-          IMPORTANT RULES:
-          1. Generate ONLY SELECT statements
-          2. Do NOT generate INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, or TRUNCATE statements
-          3. Return ONLY the SQL query without any explanation or markdown formatting
-          4. Use proper SQL syntax
-          5. Include appropriate JOINs based on table relationships
-          6. Add LIMIT clauses for safety when appropriate
-          7. Use table and column names exactly as provided in the schema
-        PROMPT
-      end
-
-      def build_user_prompt(prompt, schema)
-        # Use custom template if configured
-        if Blazer::Querygen.config.user_prompt_template.present?
-          return Blazer::Querygen.config.user_prompt_template.call(prompt, format_schema(schema))
-        end
-
-        # Default template
-        <<~PROMPT
-          Generate a SQL query for the following request:
-          #{prompt}
-
-          Database Schema:
-          #{format_schema(schema)}
-
-          Return only the SQL query without any explanation or formatting.
-        PROMPT
-      end
-
-      def format_schema(schema)
-        schema.map do |table|
-          columns_text = table[:columns].map do |col|
-            comment_part = col[:comment] ? " -- #{col[:comment]}" : ""
-            "  #{col[:name]} (#{col[:type]})#{comment_part}"
-          end.join("\n")
-
-          table_comment = table[:comment] ? "\n  Comment: #{table[:comment]}" : ""
-          "Table: #{table[:name]}#{table_comment}\n#{columns_text}"
-        end.join("\n\n")
       end
 
       def extract_sql_from_response(response)

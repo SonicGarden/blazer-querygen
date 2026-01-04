@@ -5,6 +5,8 @@ require_relative "querygen/configuration"
 require_relative "querygen/ai_client"
 require_relative "querygen/schema_extractor"
 require_relative "querygen/prompt_builder"
+require_relative "querygen/query_generator"
+require_relative "querygen/view_helpers" if defined?(Rails)
 require_relative "querygen/engine" if defined?(Rails)
 
 module Blazer

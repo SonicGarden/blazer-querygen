@@ -13,24 +13,21 @@ Next steps:
 2. Configure the initializer if needed:
    config/initializers/blazer_querygen.rb
 
-3. Include the JavaScript in Blazer's layout:
+3. Blazer layout has been generated:
 
-   Create app/views/layouts/blazer/application.html.erb:
+   The generator created app/views/layouts/blazer/application.html.erb
+   which includes the AI query generation UI using the helper method:
 
-   <!DOCTYPE html>
-   <html>
-   <head>
-     <title>Blazer</title>
-     <%= csrf_meta_tags %>
-     <%= csp_meta_tag %>
-     <%= stylesheet_link_tag "blazer/application" %>
-     <%= javascript_include_tag "blazer/application" %>
-     <%= javascript_include_tag "blazer/querygen/prompts" %>
-   </head>
-   <body>
-     <%= yield %>
-   </body>
-   </html>
+     <%= blazer_querygen_javascript %>
+
+   Benefits of using the helper method:
+   - Only loads JavaScript when OpenAI API key is configured
+   - Gracefully handles asset loading errors
+   - Prevents JavaScript errors on pages without proper configuration
+
+   Alternative: If you prefer to add it to your own layout:
+
+     <%= blazer_querygen_javascript %>
 
    Note: This overrides Blazer's default layout to include our JavaScript.
 

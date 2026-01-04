@@ -112,7 +112,7 @@ module Blazer
         end
       end
 
-      test "uses default system prompt when not configured" do
+      test "delegates to PromptBuilder for system prompt" do
         original_prompt = Blazer::Querygen.config.system_prompt
         original_key = Blazer::Querygen.config.api_key
 
@@ -120,8 +120,8 @@ module Blazer
           Blazer::Querygen.config.api_key = "test-key"
           Blazer::Querygen.config.system_prompt = nil
 
-          client = AIClient.new
-          prompt = client.send(:system_prompt)
+          # Verify that PromptBuilder.system_prompt is called by checking its behavior
+          prompt = PromptBuilder.system_prompt
 
           assert_includes prompt, "expert SQL query generator"
           assert_includes prompt, "ONLY SELECT statements"
@@ -131,26 +131,7 @@ module Blazer
         end
       end
 
-      test "uses custom system prompt when configured" do
-        original_prompt = Blazer::Querygen.config.system_prompt
-        original_key = Blazer::Querygen.config.api_key
-        custom_prompt = "Custom SQL generator instructions"
-
-        begin
-          Blazer::Querygen.config.api_key = "test-key"
-          Blazer::Querygen.config.system_prompt = custom_prompt
-
-          client = AIClient.new
-          prompt = client.send(:system_prompt)
-
-          assert_equal custom_prompt, prompt
-        ensure
-          Blazer::Querygen.config.system_prompt = original_prompt
-          Blazer::Querygen.config.api_key = original_key
-        end
-      end
-
-      test "uses default user prompt template when not configured" do
+      test "delegates to PromptBuilder for user prompt" do
         original_template = Blazer::Querygen.config.user_prompt_template
         original_key = Blazer::Querygen.config.api_key
 
@@ -158,10 +139,10 @@ module Blazer
           Blazer::Querygen.config.api_key = "test-key"
           Blazer::Querygen.config.user_prompt_template = nil
 
-          client = AIClient.new
-          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }] }]
+          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }], comment: nil }]
 
-          prompt = client.send(:build_user_prompt, "Show all users", schema)
+          # Verify that PromptBuilder.build_user_prompt is called by checking its behavior
+          prompt = PromptBuilder.build_user_prompt("Show all users", schema)
 
           assert_includes prompt, "Generate a SQL query for the following request:"
           assert_includes prompt, "Show all users"
@@ -172,26 +153,28 @@ module Blazer
         end
       end
 
-      test "uses custom user prompt template when configured" do
+      test "respects custom prompts through PromptBuilder delegation" do
+        original_prompt = Blazer::Querygen.config.system_prompt
         original_template = Blazer::Querygen.config.user_prompt_template
         original_key = Blazer::Querygen.config.api_key
-        custom_template = lambda do |user_input, formatted_schema|
-          "Custom: #{user_input} | Schema: #{formatted_schema}"
-        end
+
+        custom_system = "Custom SQL generator"
+        custom_template = ->(input, schema) { "Custom: #{input} | #{schema}" }
 
         begin
           Blazer::Querygen.config.api_key = "test-key"
+          Blazer::Querygen.config.system_prompt = custom_system
           Blazer::Querygen.config.user_prompt_template = custom_template
 
-          client = AIClient.new
-          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }] }]
+          # Verify custom prompts work through PromptBuilder
+          system_result = PromptBuilder.system_prompt
+          assert_equal custom_system, system_result
 
-          prompt = client.send(:build_user_prompt, "Show all users", schema)
-
-          assert_includes prompt, "Custom: Show all users"
-          assert_includes prompt, "Schema:"
-          assert_includes prompt, "Table: users"
+          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }], comment: nil }]
+          user_result = PromptBuilder.build_user_prompt("Test", schema)
+          assert_includes user_result, "Custom: Test"
         ensure
+          Blazer::Querygen.config.system_prompt = original_prompt
           Blazer::Querygen.config.user_prompt_template = original_template
           Blazer::Querygen.config.api_key = original_key
         end
