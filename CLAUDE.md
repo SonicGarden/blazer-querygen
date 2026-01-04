@@ -50,6 +50,12 @@ This gem uses Rails Engine with `isolate_namespace` to:
 
 **Critical**: The Engine uses initializers to inject routes into the host app's route table automatically. No manual route mounting required.
 
+**Asset Pipeline Compatibility**:
+- **Sprockets**: Fully supported (traditional Rails asset pipeline)
+- **Propshaft**: Fully supported (Rails 7+ modern asset pipeline)
+- The engine's asset initializer runs with `before: "propshaft.append_assets_path"` to ensure Propshaft recognizes assets before building its load path
+- This timing is critical for Propshaft but has no impact on Sprockets environments
+
 ### Core Components
 
 #### 1. AIClient (`lib/blazer/querygen/ai_client.rb`)
@@ -133,6 +139,10 @@ Blazer::Querygen.configure do |config|
   config.allowed_operations = [:select]
   config.excluded_tables = ["schema_migrations", "ar_internal_metadata"]
 
+  # Schema Settings
+  config.include_table_comments = true
+  config.include_column_comments = true
+
   # Prompt Customization (Optional)
   # Override system prompt for custom AI instructions
   config.system_prompt = nil  # nil = use default SELECT-only prompt
@@ -141,7 +151,14 @@ Blazer::Querygen.configure do |config|
   config.user_prompt_template = nil  # nil = use default template
   # Example:
   # config.user_prompt_template = lambda do |user_input, formatted_schema|
-  #   "Generate SQL for: #{user_input}\n\nSchema:\n#{formatted_schema}"
+  #   <<~PROMPT
+  #     Generate SQL for: #{user_input}
+  #
+  #     Tables:
+  #     #{formatted_schema}
+  #
+  #     Output only the SQL query.
+  #   PROMPT
   # end
 end
 ```
@@ -171,6 +188,7 @@ Schema extraction happens in `SchemaExtractor`:
 - Add new metadata extraction in `get_columns` or `get_tables`
 - Update `format_schema` in `PromptBuilder` to include new metadata in prompt
 - Be mindful of token limits when adding more context
+- Control comment inclusion via `include_table_comments` and `include_column_comments` configuration options
 
 ### Customizing AI Prompts
 
@@ -179,9 +197,12 @@ To customize how the AI generates queries:
 1. **System Prompt Customization** (full replacement):
    ```ruby
    config.system_prompt = <<~PROMPT
-     You are an SQL expert.
-     Generate only SELECT statements.
-     [Your custom instructions here]
+     You are an SQL query generator.
+
+     IMPORTANT: Generate only SELECT statements.
+     Do not generate INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, or TRUNCATE.
+
+     [Your additional custom instructions here]
    PROMPT
    ```
 
@@ -189,12 +210,12 @@ To customize how the AI generates queries:
    ```ruby
    config.user_prompt_template = lambda do |user_input, formatted_schema|
      <<~PROMPT
-       Task: #{user_input}
+       Generate SQL for: #{user_input}
 
-       Available tables:
+       Tables:
        #{formatted_schema}
 
-       Output SQL only.
+       Output only the SQL query.
      PROMPT
    end
    ```
@@ -226,3 +247,13 @@ Use browser console to debug: selectors are logged during initialization (can ad
 3. **API keys in environment**: Never commit API keys, always use ENV vars
 4. **CSRF protection**: Inherited from Blazer::BaseController
 5. **Custom Prompts**: When using `system_prompt` or `user_prompt_template`, developers are responsible for including proper security instructions (e.g., SELECT-only restrictions). The gem's SQL sanitization provides a safety net but should not be relied upon as the only defense.
+
+## Future Enhancements
+
+Planned features for future releases (see README.md for current status):
+- Query explanation feature (explain existing SQL in plain language)
+- Multi-language support (Japanese, etc.)
+- Support for Anthropic Claude
+- Query optimization suggestions
+- Query history and favorites
+- Multi-datasource support (currently uses `ActiveRecord::Base.connection` only)
