@@ -10,13 +10,13 @@ Gem::Specification.new do |spec|
 
   spec.summary = "AI-powered query generation for Blazer"
   spec.description = "Extend Blazer with OpenAI-powered SQL query generation from natural language prompts"
-  spec.homepage = "https://github.com/mat_aki/blazer-querygen"
+  spec.homepage = "https://github.com/SonicGarden/blazer-querygen"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/mat_aki/blazer-querygen"
-  spec.metadata["changelog_uri"] = "https://github.com/mat_aki/blazer-querygen/blob/main/CHANGELOG.md"
+  spec.metadata["source_code_uri"] = "https://github.com/SonicGarden/blazer-querygen"
+  spec.metadata["changelog_uri"] = "https://github.com/SonicGarden/blazer-querygen/blob/main/CHANGELOG.md"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.

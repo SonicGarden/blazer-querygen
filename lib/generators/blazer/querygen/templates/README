@@ -34,13 +34,10 @@ Next steps:
 
    Note: This overrides Blazer's default layout to include our JavaScript.
 
-4. Add to asset precompile (config/initializers/assets.rb):
-   Rails.application.config.assets.precompile += %w[blazer/querygen/prompts.js]
-
-5. Restart your Rails server:
+4. Restart your Rails server:
    rails restart
 
-6. Navigate to Blazer's "New Query" page and you'll see the AI generation UI!
+5. Navigate to Blazer's "New Query" page and you'll see the AI generation UI!
 
 Troubleshooting:
 - If JavaScript doesn't load, check browser console for errors
@@ -48,6 +45,6 @@ Troubleshooting:
 - Check health endpoint: /blazer/querygen/health
 
 For more information, visit:
-https://github.com/mat_aki/blazer-querygen
+https://github.com/SonicGarden/blazer-querygen
 
 ===============================================================================
