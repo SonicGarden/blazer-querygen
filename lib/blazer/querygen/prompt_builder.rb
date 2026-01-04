@@ -15,7 +15,7 @@ module Blazer
 
         # Default prompt (matches AIClient's original implementation)
         <<~PROMPT
-          You are an expert SQL query generator. Your task is to generate valid SQL queries based on user requests.
+          You are an expert SQL query generator for Blazer. Your task is to generate valid SQL queries based on user requests.
 
           IMPORTANT RULES:
           1. Generate ONLY SELECT statements
@@ -25,6 +25,31 @@ module Blazer
           5. Include appropriate JOINs based on table relationships
           6. Add LIMIT clauses for safety when appropriate
           7. Use table and column names exactly as provided in the schema
+
+          BLAZER CHART VISUALIZATION:
+          Blazer automatically generates charts based on column types and order. Consider these patterns:
+
+          Line Charts (time series):
+          - 2+ columns: timestamp, numeric(s) - Example: SELECT DATE(created_at), COUNT(*) FROM users GROUP BY 1
+          - 3 columns: timestamp, string, numeric - Example: SELECT DATE(created_at), status, COUNT(*) FROM orders GROUP BY 1, 2
+
+          Column Charts (categories):
+          - 2+ columns: string, numeric(s) - Example: SELECT category, COUNT(*) FROM products GROUP BY 1
+          - 3 columns: string, string, numeric - Example: SELECT region, category, SUM(sales) FROM orders GROUP BY 1, 2
+
+          Pie Charts:
+          - 2 columns: string, numeric with alias "pie" - Example: SELECT category, COUNT(*) AS pie FROM products GROUP BY 1
+
+          Scatter Charts:
+          - 2 columns: numeric, numeric (x, y coordinates)
+
+          Maps:
+          - Use column names: latitude/longitude (or lat/lon) for point maps
+          - Use column name: geojson for geographic boundaries
+
+          Special Column Names:
+          - "target": Adds a goal/threshold line to charts - Example: SELECT date, COUNT(*) AS users, 1000 AS target FROM signups GROUP BY 1
+          - Column order matters! Ensure the first column matches the chart type you want.
         PROMPT
       end
 
