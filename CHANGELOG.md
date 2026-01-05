@@ -16,3 +16,5 @@
 - Comprehensive configuration options (11 configurable settings)
 - Automatic retry logic with exponential backoff for API errors
 - Generator for easy installation (`rails g blazer:querygen:install`)
+- Blazer chart visualization support in AI prompts (line charts, column charts, pie charts, scatter charts, maps)
+- Special column naming conventions for charts (`target`, `latitude`/`longitude`, `geojson`, `pie` alias)
