@@ -28,6 +28,11 @@ module Blazer
           include Blazer::Querygen::ViewHelpers
         end
       end
+
+      # Register asset paths
+      initializer "blazer_querygen.assets" do |app|
+        app.config.assets.precompile += %w[blazer/querygen/prompts.js] if app.config.respond_to?(:assets)
+      end
     end
   end
 end

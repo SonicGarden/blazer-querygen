@@ -27,15 +27,6 @@ module Blazer
           end
         end
 
-        def add_asset_precompile
-          inject_into_file "config/initializers/assets.rb",
-                           "\nRails.application.config.assets.precompile += %w[blazer/querygen/prompts.js]\n",
-                           after: "Rails.application.config.assets.version = '1.0'"
-        rescue StandardError
-          say "Could not add to assets.rb automatically. Please add manually:", :yellow
-          say "Rails.application.config.assets.precompile += %w[blazer/querygen/prompts.js]", :yellow
-        end
-
         def show_readme
           readme "README" if behavior == :invoke
         end
