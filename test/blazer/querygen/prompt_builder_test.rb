@@ -68,14 +68,17 @@ module Blazer
 
       test "build_user_prompt uses custom template when configured" do
         original_template = Blazer::Querygen.config.user_prompt_template
-        custom_template = lambda do |user_input, formatted_schema|
-          "Custom: #{user_input} | Schema: #{formatted_schema}"
+        custom_template = lambda do |user_input, formatted_schema, current_sql|
+          result = "Custom: #{user_input} | Schema: #{formatted_schema}"
+          result += " | Current SQL: #{current_sql}" if current_sql
+          result
         end
 
         begin
           Blazer::Querygen.config.user_prompt_template = custom_template
 
-          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }], comment: nil }]
+          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }],
+                      comment: nil }]
 
           prompt = PromptBuilder.build_user_prompt("Show all users", schema)
 

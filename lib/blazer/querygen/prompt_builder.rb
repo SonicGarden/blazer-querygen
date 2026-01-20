@@ -25,6 +25,8 @@ module Blazer
           5. Include appropriate JOINs based on table relationships
           6. Add LIMIT clauses for safety when appropriate
           7. Use table and column names exactly as provided in the schema
+          8. When a current SQL query is provided, use it as a starting point and improve/modify it based on the user's request
+          9. Preserve the intent of the current query while applying the requested changes
 
           BLAZER CHART VISUALIZATION:
           Blazer automatically generates charts based on column types and order. Consider these patterns:
@@ -58,25 +60,45 @@ module Blazer
       #
       # @param natural_language_query [String] User's natural language request
       # @param schema [Array<Hash>] Database schema extracted by SchemaExtractor
+      # @param current_sql [String, nil] Optional current SQL query to improve/modify
       # @return [String] Complete user prompt with schema context
-      def self.build_user_prompt(natural_language_query, schema)
+      def self.build_user_prompt(natural_language_query, schema, current_sql: nil)
         formatted_schema = format_schema(schema)
 
         # Use custom template if configured
         if Blazer::Querygen.config.user_prompt_template.present?
-          return Blazer::Querygen.config.user_prompt_template.call(natural_language_query, formatted_schema)
+          return Blazer::Querygen.config.user_prompt_template.call(natural_language_query, formatted_schema,
+                                                                   current_sql)
         end
 
-        # Default template (matches AIClient's original implementation)
-        <<~PROMPT
+        # Default template - build prompt based on whether current_sql is provided
+        base_prompt = <<~PROMPT
           Generate a SQL query for the following request:
           #{natural_language_query}
+        PROMPT
+
+        # Add current SQL context if provided
+        if current_sql.present?
+          base_prompt += <<~PROMPT
+
+
+            Current SQL query (use this as a starting point and improve/modify it based on the request above):
+            ```sql
+            #{current_sql}
+            ```
+          PROMPT
+        end
+
+        base_prompt += <<~PROMPT
+
 
           Database Schema:
           #{formatted_schema}
 
           Return only the SQL query without any explanation or formatting.
         PROMPT
+
+        base_prompt
       end
 
       # Format schema array into human-readable text

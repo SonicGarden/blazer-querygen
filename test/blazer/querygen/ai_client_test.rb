@@ -139,7 +139,8 @@ module Blazer
           Blazer::Querygen.config.api_key = "test-key"
           Blazer::Querygen.config.user_prompt_template = nil
 
-          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }], comment: nil }]
+          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }],
+                      comment: nil }]
 
           # Verify that PromptBuilder.build_user_prompt is called by checking its behavior
           prompt = PromptBuilder.build_user_prompt("Show all users", schema)
@@ -170,7 +171,8 @@ module Blazer
           system_result = PromptBuilder.system_prompt
           assert_equal custom_system, system_result
 
-          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }], comment: nil }]
+          schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }],
+                      comment: nil }]
           user_result = PromptBuilder.build_user_prompt("Test", schema)
           assert_includes user_result, "Custom: Test"
         ensure
