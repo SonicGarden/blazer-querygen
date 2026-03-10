@@ -11,6 +11,7 @@ module Blazer
       #
       # @param prompt [String] Natural language description of desired query
       # @param data_source [String, nil] Optional data source name (for future multi-datasource support)
+      # @param current_sql [String, nil] Optional current SQL query to improve/modify
       # @return [Hash] Result hash with keys:
       #   - :sql [String] Generated SQL query (sanitized if config.sanitize_queries is true)
       #   - :prompt [String] Original prompt
@@ -20,14 +21,14 @@ module Blazer
       # @raise [AIClient::APIError] If OpenAI API request fails
       # @raise [AIClient::TimeoutError] If OpenAI API request times out
       # @raise [AIClient::ConfigurationError] If OpenAI API key is missing
-      def generate(prompt:, data_source: nil)
+      def generate(prompt:, data_source: nil, current_sql: nil) # rubocop:disable Metrics/MethodLength
         # Extract schema
         schema_extractor = SchemaExtractor.new
         schema = schema_extractor.extract(data_source)
 
-        # Generate SQL via AI
+        # Generate SQL via AI (with current_sql context if provided)
         ai_client = AIClient.new
-        response = ai_client.generate_query(prompt: prompt, schema: schema)
+        response = ai_client.generate_query(prompt: prompt, schema: schema, current_sql: current_sql)
 
         # Sanitize SQL if configured
         sanitized_sql = sanitize(response[:sql])

@@ -37,7 +37,7 @@ end
 
 # Configure Blazer::Querygen
 Blazer::Querygen.configure do |config|
-  config.api_key = ENV["OPENAI_API_KEY"]
+  config.api_key = ENV.fetch("OPENAI_API_KEY", nil)
   config.ai_model = "gpt-4o-mini" # Use cheaper model for tests
   config.timeout = 30
   config.max_tables_in_context = 10

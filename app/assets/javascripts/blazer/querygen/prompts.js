@@ -68,10 +68,18 @@
       return;
     }
 
+    // Get current SQL from editor
+    const currentSql = getEditorValue().trim();
+
     // Disable button and show loading state
     generateBtn.disabled = true;
     generateBtn.textContent = 'Generating...';
-    showStatus('Generating SQL query...', 'info');
+
+    // Show appropriate status message
+    const statusMessage = currentSql
+      ? 'Improving SQL query...'
+      : 'Generating SQL query...';
+    showStatus(statusMessage, 'info');
 
     // Get data source if available
     const dataSourceSelect = document.querySelector('select[name="data_source"]') ||
@@ -91,6 +99,7 @@
       },
       body: JSON.stringify({
         prompt: prompt,
+        current_sql: currentSql || null,
         data_source: dataSource
       })
     })
@@ -99,7 +108,12 @@
         if (data.success) {
           // Set the SQL in Ace Editor
           setEditorValue(data.sql);
-          showStatus('Query generated successfully!', 'success');
+
+          // Show appropriate success message
+          const successMessage = currentSql
+            ? 'Query improved successfully!'
+            : 'Query generated successfully!';
+          showStatus(successMessage, 'success');
         } else {
           showStatus('Error: ' + (data.error || 'Unknown error'), 'error');
         }
@@ -112,6 +126,28 @@
         generateBtn.disabled = false;
         generateBtn.textContent = 'Generate Query with AI';
       });
+  }
+
+  function getEditorValue() {
+    // Try to get value from Ace Editor
+    const aceEditor = document.querySelector('.ace_editor');
+
+    if (aceEditor && window.ace) {
+      // Get Ace editor instance
+      const editor = ace.edit(aceEditor);
+      if (editor) {
+        return editor.getValue();
+      }
+    }
+
+    // Fallback: try to get from regular textarea
+    const textarea = document.querySelector('textarea[name="statement"]') ||
+                    document.querySelector('textarea[name="query[statement]"]');
+    if (textarea) {
+      return textarea.value;
+    }
+
+    return '';
   }
 
   function setEditorValue(sql) {

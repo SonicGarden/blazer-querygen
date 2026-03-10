@@ -7,7 +7,7 @@ module Blazer
       # OpenAI settings
       attr_accessor :ai_model
       attr_accessor :api_key, :allowed_operations, :max_retries, :max_tables_in_context, :include_column_comments,
-                    :excluded_tables
+                    :excluded_tables, :user_prompt_template
 
       # Security settings
       attr_accessor :sanitize_queries
@@ -20,9 +20,8 @@ module Blazer
 
       # Prompt customization settings
       attr_accessor :system_prompt
-      attr_accessor :user_prompt_template
 
-      def initialize
+      def initialize # rubocop:disable Metrics/MethodLength
         @ai_model = "gpt-5.2"
         @api_key = ENV.fetch("OPENAI_API_KEY", nil)
 

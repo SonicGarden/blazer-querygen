@@ -3,9 +3,10 @@
 module Blazer
   # Controller for AI-powered query generation
   class PromptsController < BaseController
-    def run
+    def run # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
       prompt = params[:prompt]
       data_source = params[:data_source]
+      current_sql = params[:current_sql]
 
       if prompt.blank?
         render json: { error: "Prompt is required", success: false }, status: :unprocessable_entity
@@ -13,7 +14,7 @@ module Blazer
       end
 
       query_generator = Blazer::Querygen::QueryGenerator.new
-      result = query_generator.generate(prompt: prompt, data_source: data_source)
+      result = query_generator.generate(prompt: prompt, data_source: data_source, current_sql: current_sql)
       render json: result
     rescue Blazer::Querygen::QueryGenerator::UnsafeQueryError => e
       render json: { error: e.message, success: false }, status: :unprocessable_entity
@@ -29,7 +30,7 @@ module Blazer
       render json: { error: "Query generation failed: #{e.message}", success: false }, status: :internal_server_error
     end
 
-    def health
+    def health # rubocop:disable Metrics/MethodLength
       if Blazer::Querygen.config.api_key.present?
         render json: {
           status: "configured",
