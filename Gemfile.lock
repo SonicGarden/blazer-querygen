@@ -151,6 +151,8 @@ GEM
     nio4r (2.7.5)
     nokogiri (1.18.10-arm64-darwin)
       racc (~> 1.4)
+    nokogiri (1.18.10-x86_64-linux-gnu)
+      racc (~> 1.4)
     parallel (1.27.0)
     parser (3.3.9.0)
       ast (~> 2.4.1)
@@ -224,6 +226,13 @@ GEM
     rubocop-ast (1.47.1)
       parser (>= 3.3.7.2)
       prism (~> 1.4)
+    rubocop-minitest (0.39.1)
+      lint_roller (~> 1.1)
+      rubocop (>= 1.75.0, < 2.0)
+      rubocop-ast (>= 1.38.0, < 2.0)
+    rubocop-rake (0.7.1)
+      lint_roller (~> 1.1)
+      rubocop (>= 1.72.1)
     ruby-openai (6.5.0)
       event_stream_parser (>= 0.3.0, < 2.0.0)
       faraday (>= 1)
@@ -232,6 +241,7 @@ GEM
     safely_block (0.5.0)
     securerandom (0.4.1)
     sqlite3 (2.8.1-arm64-darwin)
+    sqlite3 (2.8.1-x86_64-linux-gnu)
     stringio (3.1.9)
     thor (1.4.0)
     timeout (0.6.0)
@@ -251,6 +261,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-25
+  x86_64-linux
 
 DEPENDENCIES
   blazer-querygen!
@@ -258,6 +269,8 @@ DEPENDENCIES
   minitest (~> 5.16)
   rake (~> 13.0)
   rubocop (~> 1.21)
+  rubocop-minitest (~> 0.39.1)
+  rubocop-rake (~> 0.7.1)
   sqlite3 (~> 2.0)
 
 BUNDLED WITH

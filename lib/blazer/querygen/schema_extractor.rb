@@ -3,8 +3,8 @@
 module Blazer
   module Querygen
     # Extracts database schema information without accessing actual data
-    class SchemaExtractor
-      def extract(data_source_name = nil)
+    class SchemaExtractor # rubocop:disable Metrics/ClassLength
+      def extract(data_source_name = nil) # rubocop:disable Metrics/MethodLength
         connection = get_connection(data_source_name)
         tables = get_tables(connection)
 
@@ -52,7 +52,7 @@ module Blazer
         end
       end
 
-      def get_table_comment(connection, table_name)
+      def get_table_comment(connection, table_name) # rubocop:disable Metrics/MethodLength
         return nil unless Blazer::Querygen.config.include_table_comments
 
         adapter = connection.adapter_name.downcase
@@ -67,7 +67,7 @@ module Blazer
         nil
       end
 
-      def get_column_comment(connection, table_name, column_name)
+      def get_column_comment(connection, table_name, column_name) # rubocop:disable Metrics/MethodLength
         return nil unless Blazer::Querygen.config.include_column_comments
 
         adapter = connection.adapter_name.downcase
