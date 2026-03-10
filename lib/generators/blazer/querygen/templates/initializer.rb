@@ -36,6 +36,10 @@ Blazer::Querygen.configure do |config|
   # Tables to exclude from schema extraction
   config.excluded_tables = %w[schema_migrations ar_internal_metadata]
 
+  # Include enum values from ActiveRecord enum and enumerize in schema context
+  # This helps AI understand coded values (e.g., status: {active: 0, inactive: 1})
+  config.include_enum_values = true
+
   # Prompt Customization (Optional)
   # Custom System Prompt
   # If not set, uses the default prompt that generates SELECT-only queries

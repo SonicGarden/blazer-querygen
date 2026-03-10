@@ -77,11 +77,11 @@ module Blazer
         content.gsub(/```sql\n?/, "").gsub(/```\n?/, "").strip
       end
 
-      def with_retry(max_retries: Blazer::Querygen.config.max_retries, &block)
+      def with_retry(max_retries: Blazer::Querygen.config.max_retries, &)
         attempts = 0
         begin
           attempts += 1
-          Timeout.timeout(Blazer::Querygen.config.timeout, &block)
+          Timeout.timeout(Blazer::Querygen.config.timeout, &)
         rescue Timeout::Error, Net::OpenTimeout => e
           retry if attempts < max_retries
           raise TimeoutError, "API request timed out after #{max_retries} attempts: #{e.message}"
