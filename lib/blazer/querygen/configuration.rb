@@ -7,7 +7,7 @@ module Blazer
       # OpenAI settings
       attr_accessor :ai_model
       attr_accessor :api_key, :allowed_operations, :max_retries, :max_tables_in_context, :include_column_comments,
-                    :excluded_tables, :include_enum_values
+                    :excluded_tables, :user_prompt_template
 
       # Security settings
       attr_accessor :sanitize_queries
@@ -16,10 +16,10 @@ module Blazer
       attr_accessor :timeout
 
       # Schema extraction settings
-      attr_accessor :include_table_comments
+      attr_accessor :include_table_comments, :include_enum_values
 
       # Prompt customization settings
-      attr_accessor :system_prompt, :user_prompt_template
+      attr_accessor :system_prompt
 
       def initialize
         @ai_model = "gpt-5.2"

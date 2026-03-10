@@ -1,3 +1,7 @@
+require:
+  - rubocop-minitest
+  - rubocop-rake
+
 AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
@@ -45,10 +49,9 @@ Metrics/BlockLength:
     - "test/**/*"
     - "blazer-querygen.gemspec"
 
-Lint/ShadowedException:
-  Exclude:
-    - "lib/blazer/querygen/ai_client.rb"
-
 Style/ClassAndModuleChildren:
   Exclude:
     - "test/**/*"
+
+Minitest/MultipleAssertions:
+  Max: 10

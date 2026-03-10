@@ -68,8 +68,10 @@ module Blazer
 
       test "build_user_prompt uses custom template when configured" do
         original_template = Blazer::Querygen.config.user_prompt_template
-        custom_template = lambda do |user_input, formatted_schema|
-          "Custom: #{user_input} | Schema: #{formatted_schema}"
+        custom_template = lambda do |user_input, formatted_schema, current_sql|
+          result = "Custom: #{user_input} | Schema: #{formatted_schema}"
+          result += " | Current SQL: #{current_sql}" if current_sql
+          result
         end
 
         begin
@@ -90,6 +92,7 @@ module Blazer
 
       test "format_schema handles empty schema" do
         result = PromptBuilder.format_schema([])
+
         assert_equal "No schema information available.", result
       end
 

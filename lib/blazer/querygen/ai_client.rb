@@ -19,11 +19,11 @@ module Blazer
         @client = OpenAI::Client.new(access_token: @api_key)
       end
 
-      def generate_query(prompt:, schema:)
+      def generate_query(prompt:, schema:, current_sql: nil)
         with_retry do
           # Build prompts using PromptBuilder
           system_prompt_content = PromptBuilder.system_prompt
-          user_prompt_content = PromptBuilder.build_user_prompt(prompt, schema)
+          user_prompt_content = PromptBuilder.build_user_prompt(prompt, schema, current_sql: current_sql)
 
           parameters = {
             model: @model,
@@ -82,7 +82,7 @@ module Blazer
         begin
           attempts += 1
           Timeout.timeout(Blazer::Querygen.config.timeout, &)
-        rescue Timeout::Error, Net::OpenTimeout => e
+        rescue Net::OpenTimeout => e
           retry if attempts < max_retries
           raise TimeoutError, "API request timed out after #{max_retries} attempts: #{e.message}"
         rescue StandardError => e

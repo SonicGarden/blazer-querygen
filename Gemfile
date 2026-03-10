@@ -12,3 +12,6 @@ gem "minitest", "~> 5.16"
 gem "sqlite3", "~> 2.0" # For tests
 
 gem "rubocop", "~> 1.21"
+
+gem "rubocop-minitest", "~> 0.39.1", group: :development
+gem "rubocop-rake", "~> 0.7.1", group: :development

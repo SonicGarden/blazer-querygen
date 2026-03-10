@@ -86,7 +86,8 @@ module Blazer
         extractor.define_singleton_method(:load_models) { [Order, mock_abstract] }
 
         result = extractor.extract
-        assert result.is_a?(Hash), "Should still return a hash"
+
+        assert_kind_of Hash, result, "Should still return a hash"
         assert result.key?("orders"), "Should still extract Order enums"
       end
     end
