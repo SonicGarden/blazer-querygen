@@ -25,6 +25,8 @@ module Blazer
           system_prompt_content = PromptBuilder.system_prompt
           user_prompt_content = PromptBuilder.build_user_prompt(prompt, schema, current_sql: current_sql)
 
+          log_prompts(system_prompt_content, user_prompt_content)
+
           parameters = {
             model: @model,
             messages: [
@@ -89,6 +91,13 @@ module Blazer
           retry if attempts < max_retries && retryable_error?(e)
           raise APIError, "API request failed: #{e.message}"
         end
+      end
+
+      def log_prompts(system_prompt, user_prompt)
+        return unless defined?(Rails) && Rails.logger
+
+        Rails.logger.debug { "[Blazer::Querygen] System Prompt:\n#{system_prompt}" }
+        Rails.logger.debug { "[Blazer::Querygen] User Prompt:\n#{user_prompt}" }
       end
 
       def retryable_error?(error)
