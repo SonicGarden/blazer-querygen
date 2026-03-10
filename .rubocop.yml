@@ -1,16 +1,21 @@
-require:
+plugins:
   - rubocop-minitest
   - rubocop-rake
 
 AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
+  SuggestExtensions: false
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
+
+Style/ClassAndModuleChildren:
+  Exclude:
+    - "test/**/*"
 
 Metrics/ClassLength:
   Exclude:

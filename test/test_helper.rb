@@ -32,6 +32,19 @@ if defined?(ActiveRecord)
       t.decimal :price
       t.timestamps
     end
+
+    create_table :orders, force: true do |t|
+      t.integer :status, default: 0
+      t.integer :priority
+      t.references :user
+      t.timestamps
+    end
+  end
+
+  # Test model with ActiveRecord enum for enum extraction tests
+  class Order < ActiveRecord::Base
+    enum :status, { pending: 0, processing: 1, shipped: 2, delivered: 3 }
+    enum :priority, { low: 0, medium: 1, high: 2 }
   end
 end
 

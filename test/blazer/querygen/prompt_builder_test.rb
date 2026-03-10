@@ -176,6 +176,59 @@ module Blazer
         assert_includes result, "\n\n"
       end
 
+      test "format_schema includes enum information in column line" do
+        schema = [
+          {
+            name: "orders",
+            columns: [
+              { name: "id", type: "integer", null: false, comment: nil },
+              { name: "status", type: "integer", null: false, comment: nil,
+                enums: { "pending" => 0, "shipped" => 1 } }
+            ],
+            comment: nil
+          }
+        ]
+
+        result = PromptBuilder.format_schema(schema)
+
+        assert_includes result, "status (integer) -- enum: {pending: 0, shipped: 1}"
+        refute_includes result, "id (integer) --"
+      end
+
+      test "format_schema combines comment and enum info with pipe separator" do
+        schema = [
+          {
+            name: "orders",
+            columns: [
+              { name: "status", type: "integer", null: false, comment: "Order status",
+                enums: { "active" => 0, "inactive" => 1 } }
+            ],
+            comment: nil
+          }
+        ]
+
+        result = PromptBuilder.format_schema(schema)
+
+        assert_includes result, "status (integer) -- Order status | enum: {active: 0, inactive: 1}"
+      end
+
+      test "format_schema handles enumerize string enums" do
+        schema = [
+          {
+            name: "users",
+            columns: [
+              { name: "role", type: "string", null: false, comment: nil,
+                enums: { "admin" => "admin", "user" => "user" } }
+            ],
+            comment: nil
+          }
+        ]
+
+        result = PromptBuilder.format_schema(schema)
+
+        assert_includes result, "role (string) -- enum: {admin: admin, user: user}"
+      end
+
       test "format_schema matches AIClient original format exactly" do
         # This test ensures backward compatibility
         schema = [

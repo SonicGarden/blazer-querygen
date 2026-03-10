@@ -18,6 +18,9 @@ module Blazer
           }
         end
 
+        # Enrich with enum metadata from models
+        schema = enrich_with_enums(schema)
+
         # Limit number of tables for API efficiency
         schema.take(Blazer::Querygen.config.max_tables_in_context)
       end
@@ -125,6 +128,25 @@ module Blazer
         SQL
         comment = result.first&.first
         comment if comment && !comment.empty?
+      end
+
+      def enrich_with_enums(schema) # rubocop:disable Metrics/MethodLength
+        return schema unless Blazer::Querygen.config.include_enum_values
+
+        enum_mapping = EnumExtractor.new.extract
+        return schema if enum_mapping.empty?
+
+        schema.map do |table|
+          table_enums = enum_mapping[table[:name]]
+          next table unless table_enums
+
+          enriched_columns = table[:columns].map do |col|
+            col_enums = table_enums[col[:name]]
+            col_enums ? { **col, enums: col_enums } : col
+          end
+
+          { **table, columns: enriched_columns }
+        end
       end
 
       def excluded?(table_name)

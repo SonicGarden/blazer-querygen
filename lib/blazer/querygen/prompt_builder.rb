@@ -106,18 +106,28 @@ module Blazer
       #
       # @param schema [Array<Hash>] Schema array with tables and columns
       # @return [String] Formatted schema text
-      def self.format_schema(schema)
+      def self.format_schema(schema) # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
         return "No schema information available." if schema.empty?
 
         schema.map do |table|
           columns_text = table[:columns].map do |col|
-            comment_part = col[:comment] ? " -- #{col[:comment]}" : ""
-            "  #{col[:name]} (#{col[:type]})#{comment_part}"
+            parts = []
+            parts << col[:comment] if col[:comment]
+            parts << format_enum_values(col[:enums]) if col[:enums]&.any?
+
+            suffix = parts.any? ? " -- #{parts.join(" | ")}" : ""
+            "  #{col[:name]} (#{col[:type]})#{suffix}"
           end.join("\n")
 
           table_comment = table[:comment] ? "\n  Comment: #{table[:comment]}" : ""
           "Table: #{table[:name]}#{table_comment}\n#{columns_text}"
         end.join("\n\n")
+      end
+
+      private_class_method def self.format_enum_values(enums)
+        sorted = enums.sort_by { |_, v| v.is_a?(Integer) ? v : 0 }
+        formatted = sorted.map { |k, v| "#{k}: #{v}" }.join(", ")
+        "enum: {#{formatted}}"
       end
     end
   end

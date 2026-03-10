@@ -7,7 +7,7 @@ module Blazer
       # OpenAI settings
       attr_accessor :ai_model
       attr_accessor :api_key, :allowed_operations, :max_retries, :max_tables_in_context, :include_column_comments,
-                    :excluded_tables, :user_prompt_template
+                    :excluded_tables
 
       # Security settings
       attr_accessor :sanitize_queries
@@ -16,10 +16,10 @@ module Blazer
       attr_accessor :timeout
 
       # Schema extraction settings
-      attr_accessor :include_table_comments
+      attr_accessor :include_table_comments, :include_enum_values
 
       # Prompt customization settings
-      attr_accessor :system_prompt
+      attr_accessor :system_prompt, :user_prompt_template
 
       def initialize # rubocop:disable Metrics/MethodLength
         @ai_model = "gpt-5.2"
@@ -35,6 +35,9 @@ module Blazer
         @include_table_comments = true
         @include_column_comments = true
         @excluded_tables = %w[schema_migrations ar_internal_metadata]
+
+        # Enum extraction settings
+        @include_enum_values = true
 
         # Prompt customization (nil = use defaults)
         @system_prompt = nil
