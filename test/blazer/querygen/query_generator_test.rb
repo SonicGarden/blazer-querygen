@@ -67,6 +67,7 @@ module Blazer
         safe_sql = "SELECT * FROM users"
         assert_nothing_raised do
           result = @generator.send(:sanitize, safe_sql)
+
           assert_equal safe_sql, result
         end
       end
@@ -75,6 +76,7 @@ module Blazer
         safe_sql = "SELECT id, email FROM users WHERE created_at > '2024-01-01'"
         assert_nothing_raised do
           result = @generator.send(:sanitize, safe_sql)
+
           assert_equal safe_sql, result
         end
       end
@@ -83,6 +85,7 @@ module Blazer
         safe_sql = "SELECT u.id, p.name FROM users u JOIN products p ON u.id = p.user_id"
         assert_nothing_raised do
           result = @generator.send(:sanitize, safe_sql)
+
           assert_equal safe_sql, result
         end
       end
@@ -98,6 +101,7 @@ module Blazer
           dangerous_sql = "DROP TABLE users"
           assert_nothing_raised do
             result = @generator.send(:sanitize, dangerous_sql)
+
             assert_equal dangerous_sql, result
           end
         ensure

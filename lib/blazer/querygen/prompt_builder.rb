@@ -9,7 +9,7 @@ module Blazer
       # Uses custom prompt if configured, otherwise returns default
       #
       # @return [String] System prompt instructing AI on SQL generation rules
-      def self.system_prompt
+      def self.system_prompt # rubocop:disable Metrics/MethodLength
         # Use custom prompt if configured
         return Blazer::Querygen.config.system_prompt if Blazer::Querygen.config.system_prompt.present?
 
@@ -50,7 +50,7 @@ module Blazer
           - Use column name: geojson for geographic boundaries
 
           Special Column Names:
-          - "target": Adds a goal/threshold line to charts - Example: SELECT date, COUNT(*) AS users, 1000 AS target FROM signups GROUP BY 1
+          - "target": Adds a goal/threshold line to charts - Example: SELECT date, COUNT(*) AS users, 1000 AS target FROM sign_ups GROUP BY 1
           - Column order matters! Ensure the first column matches the chart type you want.
         PROMPT
       end
@@ -62,7 +62,7 @@ module Blazer
       # @param schema [Array<Hash>] Database schema extracted by SchemaExtractor
       # @param current_sql [String, nil] Optional current SQL query to improve/modify
       # @return [String] Complete user prompt with schema context
-      def self.build_user_prompt(natural_language_query, schema, current_sql: nil)
+      def self.build_user_prompt(natural_language_query, schema, current_sql: nil) # rubocop:disable Metrics/MethodLength
         formatted_schema = format_schema(schema)
 
         # Use custom template if configured

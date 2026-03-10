@@ -10,6 +10,7 @@ require_relative "querygen/view_helpers" if defined?(Rails)
 require_relative "querygen/engine" if defined?(Rails)
 
 module Blazer
+  # AI-powered SQL query generation engine for Blazer
   module Querygen
     class Error < StandardError; end
 

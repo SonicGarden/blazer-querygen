@@ -43,9 +43,9 @@ module Blazer
           schema: schema
         )
 
-        assert result[:sql].present?
+        assert_predicate result[:sql], :present?
         assert_includes result[:sql].downcase, "select"
-        assert result[:model].present?
+        assert_predicate result[:model], :present?
       end
 
       test "handles timeout gracefully" do
@@ -65,6 +65,7 @@ module Blazer
         }
 
         sql = @client.send(:extract_sql_from_response, response_with_markdown)
+
         assert_equal "SELECT * FROM users", sql
       end
 
@@ -78,6 +79,7 @@ module Blazer
         }
 
         sql = @client.send(:extract_sql_from_response, response_plain)
+
         assert_equal "SELECT * FROM products", sql
       end
 
@@ -95,6 +97,7 @@ module Blazer
         }
 
         sql = client.send(:extract_sql_from_response, response)
+
         assert_equal "SELECT id, name FROM users WHERE active = true", sql.strip
       end
 
@@ -169,11 +172,13 @@ module Blazer
 
           # Verify custom prompts work through PromptBuilder
           system_result = PromptBuilder.system_prompt
+
           assert_equal custom_system, system_result
 
           schema = [{ name: "users", columns: [{ name: "id", type: "integer", null: false, comment: nil }],
                       comment: nil }]
           user_result = PromptBuilder.build_user_prompt("Test", schema)
+
           assert_includes user_result, "Custom: Test"
         ensure
           Blazer::Querygen.config.system_prompt = original_prompt

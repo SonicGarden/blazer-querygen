@@ -21,7 +21,7 @@ module Blazer
       # Prompt customization settings
       attr_accessor :system_prompt
 
-      def initialize
+      def initialize # rubocop:disable Metrics/MethodLength
         @ai_model = "gpt-5.2"
         @api_key = ENV.fetch("OPENAI_API_KEY", nil)
 

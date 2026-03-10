@@ -92,6 +92,7 @@ module Blazer
 
       test "format_schema handles empty schema" do
         result = PromptBuilder.format_schema([])
+
         assert_equal "No schema information available.", result
       end
 

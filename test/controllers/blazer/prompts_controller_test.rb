@@ -17,20 +17,24 @@ module Blazer
 
     test "health endpoint returns configured status" do
       get blazer_querygen_health_url
+
       assert_response :success
 
       json = JSON.parse(response.body)
+
       assert json.key?("status")
       assert json.key?("success")
     end
 
     test "run requires prompt parameter" do
       post blazer_run_prompt_url, params: { prompt: "" }, as: :json
+
       assert_response :unprocessable_entity
 
       json = JSON.parse(response.body)
-      assert_equal false, json["success"]
-      assert json["error"].present?
+
+      refute json["success"]
+      assert_predicate json["error"], :present?
     end
 
     test "run generates query with valid prompt" do
@@ -43,8 +47,9 @@ module Blazer
 
       assert_response :success
       json = JSON.parse(response.body)
+
       assert json["success"]
-      assert json["sql"].present?
+      assert_predicate json["sql"], :present?
     end
 
     test "run handles UnsafeQueryError with 422 status" do
