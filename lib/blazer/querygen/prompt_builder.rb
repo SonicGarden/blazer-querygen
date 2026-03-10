@@ -9,7 +9,7 @@ module Blazer
       # Uses custom prompt if configured, otherwise returns default
       #
       # @return [String] System prompt instructing AI on SQL generation rules
-      def self.system_prompt
+      def self.system_prompt # rubocop:disable Metrics/MethodLength
         # Use custom prompt if configured
         return Blazer::Querygen.config.system_prompt if Blazer::Querygen.config.system_prompt.present?
 
@@ -62,7 +62,7 @@ module Blazer
       # @param schema [Array<Hash>] Database schema extracted by SchemaExtractor
       # @param current_sql [String, nil] Optional current SQL query to improve/modify
       # @return [String] Complete user prompt with schema context
-      def self.build_user_prompt(natural_language_query, schema, current_sql: nil)
+      def self.build_user_prompt(natural_language_query, schema, current_sql: nil) # rubocop:disable Metrics/MethodLength
         formatted_schema = format_schema(schema)
 
         # Use custom template if configured
@@ -106,7 +106,7 @@ module Blazer
       #
       # @param schema [Array<Hash>] Schema array with tables and columns
       # @return [String] Formatted schema text
-      def self.format_schema(schema)
+      def self.format_schema(schema) # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
         return "No schema information available." if schema.empty?
 
         schema.map do |table|

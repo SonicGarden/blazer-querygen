@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-minitest
   - rubocop-rake
 
@@ -13,43 +13,11 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
 
-Style/Documentation:
-  Enabled: false
-
-Metrics/MethodLength:
+Style/ClassAndModuleChildren:
   Exclude:
-    - "lib/blazer/querygen/configuration.rb"
-    - "lib/blazer/querygen/prompt_builder.rb"
-    - "lib/blazer/querygen/ai_client.rb"
-    - "lib/blazer/querygen/schema_extractor.rb"
-    - "lib/blazer/querygen/query_generator.rb"
-    - "app/controllers/**/*"
+    - "test/**/*"
 
 Metrics/ClassLength:
-  Exclude:
-    - "test/**/*"
-    - "lib/blazer/querygen/schema_extractor.rb"
-
-Metrics/AbcSize:
-  Exclude:
-    - "lib/blazer/querygen/prompt_builder.rb"
-    - "app/controllers/**/*"
-
-Metrics/CyclomaticComplexity:
-  Exclude:
-    - "lib/blazer/querygen/prompt_builder.rb"
-
-Metrics/PerceivedComplexity:
-  Exclude:
-    - "lib/blazer/querygen/prompt_builder.rb"
-
-Metrics/BlockLength:
-  Exclude:
-    - "lib/blazer/querygen/ai_client.rb"
-    - "test/**/*"
-    - "blazer-querygen.gemspec"
-
-Style/ClassAndModuleChildren:
   Exclude:
     - "test/**/*"
 

@@ -21,7 +21,7 @@ module Blazer
       # @raise [AIClient::APIError] If OpenAI API request fails
       # @raise [AIClient::TimeoutError] If OpenAI API request times out
       # @raise [AIClient::ConfigurationError] If OpenAI API key is missing
-      def generate(prompt:, data_source: nil, current_sql: nil)
+      def generate(prompt:, data_source: nil, current_sql: nil) # rubocop:disable Metrics/MethodLength
         # Extract schema
         schema_extractor = SchemaExtractor.new
         schema = schema_extractor.extract(data_source)

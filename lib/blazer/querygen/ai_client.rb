@@ -19,8 +19,8 @@ module Blazer
         @client = OpenAI::Client.new(access_token: @api_key)
       end
 
-      def generate_query(prompt:, schema:, current_sql: nil)
-        with_retry do
+      def generate_query(prompt:, schema:, current_sql: nil) # rubocop:disable Metrics/MethodLength
+        with_retry do # rubocop:disable Metrics/BlockLength
           # Build prompts using PromptBuilder
           system_prompt_content = PromptBuilder.system_prompt
           user_prompt_content = PromptBuilder.build_user_prompt(prompt, schema, current_sql: current_sql)
@@ -77,7 +77,7 @@ module Blazer
         content.gsub(/```sql\n?/, "").gsub(/```\n?/, "").strip
       end
 
-      def with_retry(max_retries: Blazer::Querygen.config.max_retries, &)
+      def with_retry(max_retries: Blazer::Querygen.config.max_retries, &) # rubocop:disable Metrics/MethodLength
         attempts = 0
         begin
           attempts += 1
