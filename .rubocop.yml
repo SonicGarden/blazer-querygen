@@ -8,6 +8,7 @@ AllCops:
   SuggestExtensions: false
   Exclude:
     - "test/sandbox/**/*"
+    - "vendor/**/*"
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
