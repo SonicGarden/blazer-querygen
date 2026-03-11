@@ -1,20 +1,22 @@
-name: Ruby
+name: CI
 
 on:
   push:
     branches:
-      - master
+      - main
 
   pull_request:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     name: Ruby ${{ matrix.ruby }}
     strategy:
       matrix:
         ruby:
-          - '3.4.6'
+          - '3.2'
+          - '3.3'
+          - '3.4'
 
     steps:
       - uses: actions/checkout@v4
@@ -25,5 +27,21 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - name: Run the default task
+      - name: Run tests and rubocop
         run: bundle exec rake
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - name: Install bundle-audit
+        run: gem install bundler-audit
+      - name: Run bundle-audit
+        run: bundle-audit check --update

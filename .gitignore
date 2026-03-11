@@ -17,3 +17,10 @@ secrets/
 credentials/
 *.key
 *.pem
+
+# Sandbox app artifacts
+test/sandbox/db/*.sqlite3
+test/sandbox/db/*.sqlite3-*
+test/sandbox/log/
+test/sandbox/tmp/
+test/sandbox/storage/
