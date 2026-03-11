@@ -4,7 +4,7 @@ PATH
     blazer-querygen (0.1.0)
       blazer (>= 2.0)
       rails (>= 6.0)
-      ruby-openai (~> 6.0)
+      ruby-openai (>= 6, < 9)
 
 GEM
   remote: https://rubygems.org/
@@ -107,7 +107,7 @@ GEM
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
-    faraday-multipart (1.1.1)
+    faraday-multipart (1.2.0)
       multipart-post (~> 2.0)
     faraday-net_http (3.4.2)
       net-http (~> 0.5)
@@ -240,7 +240,7 @@ GEM
     rubocop-rake (0.7.1)
       lint_roller (~> 1.1)
       rubocop (>= 1.72.1)
-    ruby-openai (6.5.0)
+    ruby-openai (8.3.0)
       event_stream_parser (>= 0.3.0, < 2.0.0)
       faraday (>= 1)
       faraday-multipart (>= 1)
