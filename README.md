@@ -86,9 +86,6 @@ Blazer::Querygen.configure do |config|
   # Security: Sanitize queries (default: true)
   config.sanitize_queries = true
 
-  # Only allow SELECT operations (default: [:select])
-  config.allowed_operations = [:select]
-
   # Performance: API timeout in seconds (default: 10)
   config.timeout = 10
 

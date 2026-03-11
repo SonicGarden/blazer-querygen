@@ -91,7 +91,7 @@
     const token = csrfToken ? csrfToken.content : '';
 
     // Make API request
-    fetch('/blazer/prompts/run', {
+    fetch(getBlazerBasePath() + '/prompts/run', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -170,6 +170,18 @@
     if (textarea) {
       textarea.value = sql;
     }
+  }
+
+  function getBlazerBasePath() {
+    // Detect Blazer's mount path from the current page URL or links
+    var blazerLink = document.querySelector('a[href*="/blazer"]');
+    if (blazerLink) {
+      var match = blazerLink.href.match(/(.*\/blazer)/);
+      if (match) {
+        return match[1].replace(window.location.origin, '');
+      }
+    }
+    return '/blazer';
   }
 
   function showStatus(message, type) {

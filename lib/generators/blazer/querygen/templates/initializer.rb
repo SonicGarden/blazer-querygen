@@ -13,9 +13,6 @@ Blazer::Querygen.configure do |config|
   # Sanitize generated queries to prevent dangerous SQL operations
   config.sanitize_queries = true
 
-  # Only allow SELECT operations (recommended for security)
-  config.allowed_operations = [:select]
-
   # Performance Settings
   # API request timeout in seconds
   config.timeout = 10

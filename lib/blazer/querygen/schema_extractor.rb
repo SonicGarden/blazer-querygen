@@ -88,45 +88,43 @@ module Blazer
       end
 
       def fetch_postgres_table_comment(connection, table_name)
-        result = connection.execute(<<~SQL)
-          SELECT obj_description(to_regclass('#{connection.quote_table_name(table_name)}'))
-        SQL
-        result.first&.values&.first
+        result = connection.exec_query(
+          "SELECT obj_description(to_regclass($1))",
+          "Blazer::Querygen",
+          [table_name]
+        )
+        result.rows.first&.first
       end
 
       def fetch_mysql_table_comment(connection, table_name)
-        result = connection.execute(<<~SQL)
-          SELECT table_comment
-          FROM information_schema.tables
-          WHERE table_schema = DATABASE()
-          AND table_name = #{connection.quote(table_name)}
-        SQL
-        comment = result.first&.first
+        result = connection.exec_query(
+          "SELECT table_comment FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?",
+          "Blazer::Querygen",
+          [table_name]
+        )
+        comment = result.rows.first&.first
         comment if comment && !comment.empty?
       end
 
       def fetch_postgres_column_comment(connection, table_name, column_name)
-        result = connection.execute(<<~SQL)
-          SELECT col_description(
-            to_regclass('#{connection.quote_table_name(table_name)}')::oid,
-            (SELECT ordinal_position
-             FROM information_schema.columns
-             WHERE table_name=#{connection.quote(table_name)}
-             AND column_name=#{connection.quote(column_name)})
-          )
-        SQL
-        result.first&.values&.first
+        result = connection.exec_query(
+          "SELECT col_description(to_regclass($1)::oid, " \
+          "(SELECT ordinal_position FROM information_schema.columns " \
+          "WHERE table_name = $2 AND column_name = $3))",
+          "Blazer::Querygen",
+          [table_name, table_name, column_name]
+        )
+        result.rows.first&.first
       end
 
       def fetch_mysql_column_comment(connection, table_name, column_name)
-        result = connection.execute(<<~SQL)
-          SELECT column_comment
-          FROM information_schema.columns
-          WHERE table_schema = DATABASE()
-          AND table_name = #{connection.quote(table_name)}
-          AND column_name = #{connection.quote(column_name)}
-        SQL
-        comment = result.first&.first
+        result = connection.exec_query(
+          "SELECT column_comment FROM information_schema.columns " \
+          "WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?",
+          "Blazer::Querygen",
+          [table_name, column_name]
+        )
+        comment = result.rows.first&.first
         comment if comment && !comment.empty?
       end
 

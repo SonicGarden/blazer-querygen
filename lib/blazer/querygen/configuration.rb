@@ -6,7 +6,7 @@ module Blazer
     class Configuration
       # OpenAI settings
       attr_accessor :ai_model
-      attr_accessor :api_key, :allowed_operations, :max_retries, :max_tables_in_context, :include_column_comments,
+      attr_accessor :api_key, :max_retries, :max_tables_in_context, :include_column_comments,
                     :excluded_tables
 
       # Security settings
@@ -26,7 +26,6 @@ module Blazer
         @api_key = ENV.fetch("OPENAI_API_KEY", nil)
 
         @sanitize_queries = true
-        @allowed_operations = [:select]
 
         @timeout = 10
         @max_retries = 3
