@@ -64,11 +64,8 @@ module Blazer
       private
 
       def reasoning_model?
-        # Reasoning models (o1 series, gpt-5.x) use different API parameters
-        # These models use max_completion_tokens instead of max_tokens
-        # and don't support temperature or system messages
-        model_str = @model.to_s
-        model_str.start_with?("o1") || model_str.start_with?("gpt-5")
+        model_str = @model.to_s.downcase
+        model_str.match?(/\A(o[134]|gpt-5)/)
       end
 
       def extract_sql_from_response(response)

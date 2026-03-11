@@ -63,47 +63,81 @@ module Blazer
         end
       end
 
+      test "sanitize blocks EXEC statements" do
+        assert_raises(QueryGenerator::UnsafeQueryError) do
+          @generator.send(:sanitize, "EXEC sp_executesql N'SELECT 1'")
+        end
+      end
+
+      test "sanitize blocks COPY statements" do
+        assert_raises(QueryGenerator::UnsafeQueryError) do
+          @generator.send(:sanitize, "COPY users TO '/tmp/users.csv'")
+        end
+      end
+
+      test "sanitize blocks multiple statements" do
+        assert_raises(QueryGenerator::UnsafeQueryError) do
+          @generator.send(:sanitize, "SELECT 1; SELECT 2")
+        end
+      end
+
+      test "sanitize blocks injection via semicolon" do
+        assert_raises(QueryGenerator::UnsafeQueryError) do
+          @generator.send(:sanitize, "SELECT 1; DROP TABLE users")
+        end
+      end
+
+      test "sanitize blocks queries not starting with SELECT or WITH" do
+        assert_raises(QueryGenerator::UnsafeQueryError) do
+          @generator.send(:sanitize, "EXPLAIN SELECT * FROM users")
+        end
+      end
+
       test "sanitize allows SELECT statements" do
         safe_sql = "SELECT * FROM users"
-        assert_nothing_raised do
-          result = @generator.send(:sanitize, safe_sql)
+        result = @generator.send(:sanitize, safe_sql)
 
-          assert_equal safe_sql, result
-        end
+        assert_equal safe_sql, result
       end
 
       test "sanitize allows SELECT with WHERE clause" do
         safe_sql = "SELECT id, email FROM users WHERE created_at > '2024-01-01'"
-        assert_nothing_raised do
-          result = @generator.send(:sanitize, safe_sql)
+        result = @generator.send(:sanitize, safe_sql)
 
-          assert_equal safe_sql, result
-        end
+        assert_equal safe_sql, result
       end
 
       test "sanitize allows SELECT with JOINs" do
         safe_sql = "SELECT u.id, p.name FROM users u JOIN products p ON u.id = p.user_id"
-        assert_nothing_raised do
-          result = @generator.send(:sanitize, safe_sql)
+        result = @generator.send(:sanitize, safe_sql)
 
-          assert_equal safe_sql, result
-        end
+        assert_equal safe_sql, result
+      end
+
+      test "sanitize allows WITH (CTE) queries" do
+        safe_sql = "WITH recent AS (SELECT * FROM users WHERE created_at > '2024-01-01') SELECT * FROM recent"
+        result = @generator.send(:sanitize, safe_sql)
+
+        assert_equal safe_sql, result
+      end
+
+      test "sanitize allows trailing semicolon" do
+        safe_sql = "SELECT * FROM users;"
+        result = @generator.send(:sanitize, safe_sql)
+
+        assert_equal safe_sql, result
       end
 
       test "sanitize respects configuration setting" do
         original_setting = Blazer::Querygen.config.sanitize_queries
 
         begin
-          # Disable sanitization
           Blazer::Querygen.config.sanitize_queries = false
 
-          # Should not raise even with dangerous SQL
           dangerous_sql = "DROP TABLE users"
-          assert_nothing_raised do
-            result = @generator.send(:sanitize, dangerous_sql)
+          result = @generator.send(:sanitize, dangerous_sql)
 
-            assert_equal dangerous_sql, result
-          end
+          assert_equal dangerous_sql, result
         ensure
           Blazer::Querygen.config.sanitize_queries = original_setting
         end
@@ -124,8 +158,6 @@ module Blazer
       end
 
       test "sanitize catches dangerous keywords in comments" do
-        # Edge case: SQL with comment containing dangerous keyword
-        # This is acceptable - comments shouldn't be executed
         sql_with_comment = "SELECT * FROM users -- Don't DROP this table"
 
         assert_raises(QueryGenerator::UnsafeQueryError) do

@@ -50,8 +50,16 @@ module Blazer
       def sanitize(sql)
         return sql unless Blazer::Querygen.config.sanitize_queries
 
-        # Check for dangerous operations
-        dangerous_patterns = /\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|GRANT|REVOKE)\b/i
+        stripped = sql.strip
+
+        # Block multiple statements (semicolons other than trailing)
+        raise UnsafeQueryError, "Multiple SQL statements are not allowed." if stripped.sub(/;\s*\z/, "").include?(";")
+
+        # Ensure query starts with SELECT or WITH (for CTEs)
+        raise UnsafeQueryError, "Query must start with SELECT or WITH." unless stripped.match?(/\A\s*(SELECT|WITH)\b/i)
+
+        # Block dangerous operations
+        dangerous_patterns = /\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|GRANT|REVOKE|EXEC|EXECUTE|COPY)\b/i
         if sql.match?(dangerous_patterns)
           raise UnsafeQueryError, "Unsafe SQL operation detected. Only SELECT queries are allowed."
         end

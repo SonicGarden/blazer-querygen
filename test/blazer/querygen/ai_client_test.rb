@@ -55,50 +55,95 @@ module Blazer
       end
 
       test "extracts SQL from response with markdown" do
-        skip "OpenAI API key not configured" unless ENV["OPENAI_API_KEY"]
+        original_key = Blazer::Querygen.config.api_key
 
-        # Test the private extract_sql_from_response method
-        response_with_markdown = {
-          "choices" => [
-            { "message" => { "content" => "```sql\nSELECT * FROM users\n```" } }
-          ]
-        }
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          client = AIClient.new
+          response_with_markdown = {
+            "choices" => [
+              { "message" => { "content" => "```sql\nSELECT * FROM users\n```" } }
+            ]
+          }
 
-        sql = @client.send(:extract_sql_from_response, response_with_markdown)
+          sql = client.send(:extract_sql_from_response, response_with_markdown)
 
-        assert_equal "SELECT * FROM users", sql
+          assert_equal "SELECT * FROM users", sql
+        ensure
+          Blazer::Querygen.config.api_key = original_key
+        end
       end
 
       test "extracts plain SQL from response" do
-        skip "OpenAI API key not configured" unless ENV["OPENAI_API_KEY"]
+        original_key = Blazer::Querygen.config.api_key
 
-        response_plain = {
-          "choices" => [
-            { "message" => { "content" => "SELECT * FROM products" } }
-          ]
-        }
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          client = AIClient.new
+          response_plain = {
+            "choices" => [
+              { "message" => { "content" => "SELECT * FROM products" } }
+            ]
+          }
 
-        sql = @client.send(:extract_sql_from_response, response_plain)
+          sql = client.send(:extract_sql_from_response, response_plain)
 
-        assert_equal "SELECT * FROM products", sql
+          assert_equal "SELECT * FROM products", sql
+        ensure
+          Blazer::Querygen.config.api_key = original_key
+        end
       end
 
-      test "extracts SQL from markdown without API" do
-        # This test doesn't need API key - just tests the extraction logic
-        skip "OpenAI API key not configured" unless ENV["OPENAI_API_KEY"]
+      test "reasoning_model detects o1 models" do
+        original_key = Blazer::Querygen.config.api_key
 
-        client = AIClient.new
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          client = AIClient.new(model: "o1-mini")
 
-        # Mock response with SQL in markdown
-        response = {
-          "choices" => [
-            { "message" => { "content" => "```sql\nSELECT id, name FROM users WHERE active = true\n```" } }
-          ]
-        }
+          assert client.send(:reasoning_model?)
+        ensure
+          Blazer::Querygen.config.api_key = original_key
+        end
+      end
 
-        sql = client.send(:extract_sql_from_response, response)
+      test "reasoning_model detects o3 models" do
+        original_key = Blazer::Querygen.config.api_key
 
-        assert_equal "SELECT id, name FROM users WHERE active = true", sql.strip
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          client = AIClient.new(model: "o3")
+
+          assert client.send(:reasoning_model?)
+        ensure
+          Blazer::Querygen.config.api_key = original_key
+        end
+      end
+
+      test "reasoning_model detects gpt-5 models" do
+        original_key = Blazer::Querygen.config.api_key
+
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          client = AIClient.new(model: "gpt-5.2")
+
+          assert client.send(:reasoning_model?)
+        ensure
+          Blazer::Querygen.config.api_key = original_key
+        end
+      end
+
+      test "reasoning_model returns false for standard models" do
+        original_key = Blazer::Querygen.config.api_key
+
+        begin
+          Blazer::Querygen.config.api_key = "test-key"
+          client = AIClient.new(model: "gpt-4o")
+
+          refute client.send(:reasoning_model?)
+        ensure
+          Blazer::Querygen.config.api_key = original_key
+        end
       end
 
       test "client initialization validates config" do
