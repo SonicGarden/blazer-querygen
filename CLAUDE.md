@@ -136,7 +136,6 @@ Blazer::Querygen.configure do |config|
 
   # Security Settings
   config.sanitize_queries = true
-  config.allowed_operations = [:select]
   config.excluded_tables = ["schema_migrations", "ar_internal_metadata"]
 
   # Schema Settings
