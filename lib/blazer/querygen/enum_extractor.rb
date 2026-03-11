@@ -88,7 +88,7 @@ module Blazer
 
         model.enumerized_attributes.each_with_object({}) do |attr, result|
           values = attr.values.map(&:to_s)
-          result[attr.name.to_s] = values.each_with_object({}) { |v, h| h[v] = v }
+          result[attr.name.to_s] = values.to_h { |v| [v, v] }
         end
       rescue StandardError
         {}
