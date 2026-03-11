@@ -35,7 +35,7 @@ Gem::Specification.new do |spec|
   # Runtime dependencies
   spec.add_dependency "blazer", ">= 2.0"
   spec.add_dependency "rails", ">= 6.0"
-  spec.add_dependency "ruby-openai", "~> 6.0"
+  spec.add_dependency "ruby-openai", ">= 6", "< 9"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
