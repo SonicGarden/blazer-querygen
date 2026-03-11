@@ -136,7 +136,9 @@ GEM
       net-smtp
     marcel (1.1.0)
     mini_mime (1.1.5)
-    minitest (5.27.0)
+    minitest (6.0.2)
+      drb (~> 2.0)
+      prism (~> 1.5)
     multipart-post (2.4.1)
     net-http (0.9.1)
       uri (>= 0.11.1)
@@ -273,7 +275,7 @@ PLATFORMS
 DEPENDENCIES
   blazer-querygen!
   irb
-  minitest (~> 5.16)
+  minitest (~> 6.0)
   propshaft
   puma
   rake (~> 13.0)
