@@ -6,6 +6,8 @@ AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
   SuggestExtensions: false
+  Exclude:
+    - "test/sandbox/**/*"
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+SANDBOX_DIR="$(cd "$(dirname "$0")/../test/sandbox" && pwd)"
+cd "$SANDBOX_DIR"
+
+echo "=== Blazer::Querygen sandbox app ==="
+echo ""
+
+# Setup database
+if [ ! -f db/development.sqlite3 ]; then
+  echo "Setting up database..."
+  bundle exec rails db:create db:migrate db:seed
+  echo ""
+else
+  echo "Running pending migrations..."
+  bundle exec rails db:migrate 2>/dev/null || true
+  echo ""
+fi
+
+if [ -n "$OPENAI_API_KEY" ]; then
+  echo "OpenAI API key detected - AI query generation enabled"
+else
+  echo "WARNING: OPENAI_API_KEY not set"
+  echo "  Set it with: OPENAI_API_KEY=your_key bin/sandbox"
+fi
+
+echo ""
+echo "Starting server at http://localhost:3000/blazer"
+echo ""
+
+exec bundle exec rails server -p 3000

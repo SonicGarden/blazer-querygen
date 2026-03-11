@@ -184,6 +184,23 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 To install this gem onto your local machine, run `bundle exec rake install`.
 
+### Sandbox App
+
+A sandbox Rails application is included at `test/sandbox/` for manual testing. It comes pre-configured with Blazer, sample data (users, products, orders), and sample queries.
+
+```bash
+# Start the sandbox app (handles DB setup automatically on first run)
+bin/sandbox
+
+# With OpenAI API key for AI query generation
+OPENAI_API_KEY=your_key bin/sandbox
+
+# Reset the database
+rake sandbox:reset
+```
+
+Once running, open http://localhost:3000/blazer to access the Blazer UI with the querygen plugin.
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/SonicGarden/blazer-querygen. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/SonicGarden/blazer-querygen/blob/master/CODE_OF_CONDUCT.md).
