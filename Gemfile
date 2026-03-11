@@ -15,3 +15,7 @@ gem "rubocop", "~> 1.21"
 
 gem "rubocop-minitest", "~> 0.39.1", group: :development
 gem "rubocop-rake", "~> 0.7.1", group: :development
+
+# For sandbox app
+gem "propshaft"
+gem "puma"
