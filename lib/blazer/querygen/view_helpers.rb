@@ -30,7 +30,7 @@ module Blazer
 
         # Load the JavaScript asset with error handling
         begin
-          javascript_include_tag("blazer/querygen/prompts")
+          javascript_include_tag("blazer/querygen/prompts", nonce: true)
         rescue StandardError => e
           # Log error but don't break the page
           Rails.logger.error("Failed to load Blazer Querygen JavaScript: #{e.message}") if defined?(Rails)
