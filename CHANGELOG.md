@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Changed
+- Drop support for Ruby 3.2 (EOL); require Ruby >= 3.3
+- Add Ruby 4.0 to the CI matrix
+
 ## [0.1.0] - 2026-01-04
 
 ### Added
