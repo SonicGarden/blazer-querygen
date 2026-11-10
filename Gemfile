@@ -9,11 +9,11 @@ gem "irb"
 gem "rake", "~> 13.0"
 
 gem "minitest", "~> 6.0"
-gem "sqlite3", "~> 2.9" # For tests
+gem "sqlite3", "~> 2.10" # For tests
 
-gem "rubocop", "~> 1.86"
+gem "rubocop", "~> 1.92"
 
-gem "rubocop-minitest", "~> 0.39.1", group: :development
+gem "rubocop-minitest", "~> 0.41.0", group: :development
 gem "rubocop-rake", "~> 0.7.1", group: :development
 
 # For sandbox app
